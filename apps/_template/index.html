@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ja" data-theme="auto">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="新しいアプリ">
+<meta name="theme-color" content="#1b4332">
+<title>新しいアプリ（テンプレート）</title>
+<style>
+  /* === 共通デザイントークン（CLAUDE.md のルールに準拠）=== */
+  :root{
+    --bg:#f4efe6; --bg2:#ece4d6; --card:#fffdf9; --ink:#2a2620; --sub:#8a8172;
+    --line:#e4dccb; --green:#1b4332; --green2:#40916c; --accent:#c1583b; --gold:#c99a2e;
+    --shadow:0 6px 22px rgba(60,50,30,.10);
+    --serif:"Times New Roman",'Hiragino Mincho ProN','Yu Mincho',serif;
+    --sans:-apple-system,BlinkMacSystemFont,'Hiragino Sans','Yu Gothic',sans-serif;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#1c1a17; --bg2:#232019; --card:#2a2620; --ink:#ece4d6; --sub:#b3a892;
+      --line:#3a352c; --shadow:0 6px 22px rgba(0,0,0,.35);
+    }
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:var(--sans); color:var(--ink);
+    background:linear-gradient(160deg,var(--bg),var(--bg2));
+    min-height:100vh; padding:calc(env(safe-area-inset-top) + 24px) 20px 48px;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:640px; margin:0 auto}
+  h1{font-family:var(--serif); color:var(--green); font-size:26px; letter-spacing:.03em}
+  @media (prefers-color-scheme: dark){ h1{color:var(--green2)} }
+  .card{
+    background:var(--card); border:1px solid var(--line); border-radius:20px;
+    padding:22px; box-shadow:var(--shadow); margin-top:18px;
+  }
+  p{color:var(--sub); line-height:1.7; font-size:14px}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>新しいアプリ</h1>
+    <div class="card">
+      <p>これは新規アプリの雛形です。このフォルダ（<code>_template</code>）をコピーして
+      <code>apps/&lt;アプリ名&gt;/</code> を作り、ここから実装を始めてください。</p>
+    </div>
+  </div>
+
+  <script>
+    // ここにアプリのロジックを書きます。
+    // データ保存が必要なら localStorage を使ってください（サーバー不要）。
+  </script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+# OS / エディタ
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
+
+# ログ・一時ファイル
+*.log
+tmp/
+.cache/
+
+# 環境変数・秘密情報（誤コミット防止）
+.env
+.env.*
