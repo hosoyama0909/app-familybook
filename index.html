@@ -169,6 +169,27 @@
   .bnav button.active{color:var(--green)}
   .tripname{font-size:12px;font-weight:800;color:var(--sub);margin-bottom:10px;display:flex;align-items:center;gap:6px}
   .tripname b{color:var(--ink)}
+
+  /* ===== きろく（当日モード） ===== */
+  .moments{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px}
+  @media (max-width:360px){.moments{grid-template-columns:1fr 1fr}}
+  .mbtn{border:2px solid var(--line);border-radius:18px;padding:15px 6px 12px;background:var(--card);
+    box-shadow:var(--shadow);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px;
+    color:var(--ink);font-weight:800;font-size:13px;transition:transform .09s ease}
+  .mbtn .me{font-size:32px;line-height:1}
+  .mbtn:active{transform:scale(.92)}
+  .mbtn.fuss{border-color:var(--accent)}
+  .mbtn.spot{border-color:var(--gold)}
+  @media (prefers-reduced-motion:reduce){.mbtn{transition:none}}
+  .memoin{width:100%;border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:14px;
+    font-family:inherit;background:var(--bg2);color:var(--ink);margin-bottom:12px}
+  .memoin:focus{outline:2px solid var(--green2)}
+  .lgsum{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:8px;min-height:2px}
+  .lgsum .chip{font-size:13.5px;font-weight:800;background:var(--bg2);color:var(--ink);
+    padding:6px 12px;border-radius:12px;font-variant-numeric:tabular-nums}
+  .daysep{font-family:var(--serif);font-size:12.5px;font-weight:700;color:var(--sub);letter-spacing:1px;margin:16px 2px 7px}
+  .logi .lt{color:var(--accent);min-width:42px}
+  .kidage{font-size:11.5px;color:var(--sub);font-weight:600}
 </style>
 </head>
 <body>
@@ -184,6 +205,7 @@
 <nav class="tabs" id="tabs">
   <button class="tab active" data-page="home">🏠 ホーム</button>
   <button class="tab" data-page="sched">🗓️ スケジュール</button>
+  <button class="tab" data-page="log">📝 きろく</button>
   <button class="tab" data-page="meals">🍴 食事</button>
   <button class="tab" data-page="map">📍 マップ</button>
   <button class="tab" data-page="photos">📸 写真</button>
@@ -240,6 +262,30 @@
       <input class="grow" id="evMap" type="text" placeholder="地図検索ワード（任意）">
     </div>
     <button class="addbtn" id="evAdd">＋ この日に予定を追加</button>
+  </div>
+</section>
+
+<!-- ============ きろく（当日モード） ============ -->
+<section class="page" id="log">
+  <div class="tripname" id="tn-log"></div>
+  <div class="editorial">TODAY'S MOMENTS</div>
+  <div class="sec-title">📝 今日のきろく</div>
+  <div class="sec-sub">おでかけ中はボタンを押すだけ。時刻（と、許可すれば場所）を自動で残します。</div>
+  <input class="memoin" id="lgMemo" type="text" placeholder="ひとことメモ（任意）— 押す前に入れると記録に添えられます">
+  <div class="moments" id="moments"></div>
+  <div class="lgsum" id="lgsummary"></div>
+  <div id="lglist"></div>
+
+  <div class="editorial" style="margin-top:22px">CHILDREN</div>
+  <div class="sec-title" style="font-size:18px">👶 お子さん</div>
+  <div class="sec-sub">生年月を登録すると年齢を自動計算。成長のきろくやAIの土台になります。</div>
+  <div class="list" id="kidlist"></div>
+  <div class="form">
+    <div class="frow">
+      <input class="grow" id="kidName" type="text" placeholder="ニックネーム（例：長女）">
+      <input id="kidBirth" type="month" style="width:140px">
+    </div>
+    <button class="addbtn" id="kidAdd">＋ お子さんを登録</button>
   </div>
 </section>
 
@@ -352,9 +398,9 @@
 <nav class="bnav" id="bnav">
   <button class="active" data-page="home"><span class="ic">🏠</span>ホーム</button>
   <button data-page="sched"><span class="ic">🗓️</span>予定</button>
-  <button data-page="pack"><span class="ic">🎒</span>持ち物</button>
-  <button data-page="budget"><span class="ic">💰</span>予算</button>
+  <button data-page="log"><span class="ic">📝</span>きろく</button>
   <button data-page="photos"><span class="ic">📸</span>写真</button>
+  <button data-page="pack"><span class="ic">🎒</span>持ち物</button>
 </nav>
 
 <script>
@@ -373,6 +419,17 @@ const TYPES={
   other:{e:'🚗',n:'おでかけ',pack:['飲み物','おやつ','ウェットティッシュ']}
 };
 const BABY=['オムツ・おしりふき','着替え(子ども)','母子手帳・保険証','ベビーカー'];
+
+/* ===== きろく（当日モード）のイベント種類 ===== */
+const MOMENTS=[
+  {k:'fuss',  e:'😭', n:'グズり', cls:'fuss'},
+  {k:'hold',  e:'🤱', n:'抱っこ', cls:''},
+  {k:'milk',  e:'🍼', n:'ミルク', cls:''},
+  {k:'diaper',e:'💩', n:'おむつ', cls:''},
+  {k:'nap',   e:'😴', n:'ねんね', cls:''},
+  {k:'spot',  e:'⭐', n:'神スポット', cls:'spot'}
+];
+const MOMENT_MAP={};MOMENTS.forEach(m=>MOMENT_MAP[m.k]=m);
 
 /* ===== 初期データ（箱根） ===== */
 function seedHakone(){
@@ -400,7 +457,7 @@ function seedHakone(){
     ],
     spots:[{name:'ユネッサン駐車場',map:'箱根小涌園ユネッサン 駐車場'}],
     pack:['水着','タオル','着替え','オムツ・おしりふき','飲み物','おやつ','ベビーカー','モバイルバッテリー'].map(x=>({x:x,c:false})),
-    budget:[],photos:[]};
+    budget:[],photos:[],logs:[]};
 }
 
 /* ===== 読み込み（旧しおりデータの引き継ぎ付き） ===== */
@@ -421,6 +478,8 @@ if(!db||!Array.isArray(db.trips)){
   persist(false);
 }
 if(!db.seq)db.seq=db.trips.length+1;
+if(!Array.isArray(db.children))db.children=[];
+db.trips.forEach(t=>{if(!Array.isArray(t.logs))t.logs=[];});
 
 let tT;
 function persist(show){try{localStorage.setItem(KEY,JSON.stringify(db));if(show!==false)toast('💾 保存しました');}
@@ -513,7 +572,7 @@ $('ntAdd').onclick=()=>{
   if(!s){toast('開始日を入れてね');return;}
   if(!e||e<s)e=s;
   const tr={id:'t'+(db.seq++),name:name,type:type,dest:dest,start:s,end:e,
-    schedule:[],meals:[],spots:[],photos:[],budget:[],
+    schedule:[],meals:[],spots:[],photos:[],budget:[],logs:[],
     pack:(TYPES[type]||TYPES.other).pack.concat(BABY).map(x=>({x:x,c:false}))};
   db.trips.push(tr);db.active=tr.id;
   $('ntName').value='';$('ntDest').value='';$('ntStart').value='';$('ntEnd').value='';
@@ -555,6 +614,97 @@ $('evAdd').onclick=()=>{
   tr.schedule.push({d:selDay[tr.id],t:t,title:title,note:$('evNote').value.trim(),map:$('evMap').value.trim()});
   $('evTitle').value='';$('evNote').value='';$('evMap').value='';
   persist();renderSched();renderMap();updateCountdown();
+};
+
+/* ===== きろく（当日モード） ===== */
+let lastGeo=null,lastGeoAt=0;
+function logTime(ts){const d=new Date(ts);return pad(d.getHours())+':'+pad(d.getMinutes());}
+function dayLabel(iso){const d=pdate(iso);const today=fdate(new Date());
+  const pre=iso===today?'今日 ':'';return pre+(d.getMonth()+1)+'/'+d.getDate()+'（'+WD[d.getDay()]+'）';}
+
+$('moments').innerHTML=MOMENTS.map(m=>
+  '<button class="mbtn '+m.cls+'" data-k="'+m.k+'"><span class="me">'+m.e+'</span>'+m.n+'</button>').join('');
+$('moments').querySelectorAll('.mbtn').forEach(b=>b.onclick=()=>recordMoment(b.dataset.k));
+
+function recordMoment(k){
+  const tr=T();if(!tr){toast('先におでかけを作成してね');return;}
+  if(!Array.isArray(tr.logs))tr.logs=[];
+  const memo=$('lgMemo').value.trim();
+  const log={id:'l'+Date.now()+'_'+Math.floor(Math.random()*1000),k:k,ts:Date.now(),memo:memo};
+  const fresh=lastGeo&&(Date.now()-lastGeoAt<120000);
+  if(fresh){log.lat=lastGeo.lat;log.lng=lastGeo.lng;}
+  tr.logs.push(log);
+  $('lgMemo').value='';
+  persist(false);
+  const m=MOMENT_MAP[k];toast(m.e+' '+m.n+'を記録');
+  renderLog();
+  if(!fresh&&navigator.geolocation){
+    navigator.geolocation.getCurrentPosition(p=>{
+      lastGeo={lat:p.coords.latitude,lng:p.coords.longitude};lastGeoAt=Date.now();
+      const lg=(T().logs||[]).find(x=>x.id===log.id);
+      if(lg&&lg.lat==null){lg.lat=lastGeo.lat;lg.lng=lastGeo.lng;persist(false);renderLog();}
+    },()=>{},{enableHighAccuracy:false,timeout:8000,maximumAge:120000});
+  }
+}
+
+function renderLog(){
+  const tr=T();
+  if(!tr){$('lglist').innerHTML='<div class="empty">ホームでおでかけを作成してください</div>';
+    $('lgsummary').innerHTML='';renderKids();return;}
+  tripHeader('tn-log');
+  if(!Array.isArray(tr.logs))tr.logs=[];
+  const today=fdate(new Date());
+  const cnt={};tr.logs.forEach(l=>{if(fdate(new Date(l.ts))===today)cnt[l.k]=(cnt[l.k]||0)+1;});
+  $('lgsummary').innerHTML=MOMENTS.filter(m=>cnt[m.k]).map(m=>
+    '<span class="chip">'+m.e+' ×'+cnt[m.k]+'</span>').join('');
+  const byDate={};
+  tr.logs.forEach(l=>{const d=fdate(new Date(l.ts));(byDate[d]=byDate[d]||[]).push(l);});
+  const dates=Object.keys(byDate).sort().reverse();
+  if(!dates.length){
+    $('lglist').innerHTML='<div class="empty">まだ記録がありません。<br>おでかけ中にボタンを押すと、ここに時系列で残ります。</div>';
+    renderKids();return;
+  }
+  $('lglist').innerHTML=dates.map(d=>{
+    const items=byDate[d].slice().sort((a,b)=>b.ts-a.ts).map(l=>{
+      const m=MOMENT_MAP[l.k]||{e:'•',n:l.k};
+      const nav=l.lat!=null?'<a class="navb" href="'+mapUrl(l.lat+','+l.lng)+'" target="_blank" rel="noopener">🧭</a>':'';
+      const sub=[l.memo?esc(l.memo):'',l.lat!=null?'📍記録あり':''].filter(Boolean).join(' ・ ');
+      return '<div class="li logi"><span class="lt">'+logTime(l.ts)+'</span>'+
+        '<div class="lm"><b>'+m.e+' '+m.n+'</b>'+(sub?'<small>'+sub+'</small>':'')+'</div>'+
+        nav+'<button class="xdel" data-id="'+l.id+'">✕</button></div>';
+    }).join('');
+    return '<div class="daysep">'+dayLabel(d)+'</div><div class="list">'+items+'</div>';
+  }).join('');
+  $('lglist').querySelectorAll('.xdel').forEach(b=>b.onclick=()=>{
+    tr.logs=tr.logs.filter(l=>l.id!==b.dataset.id);persist();renderLog();});
+  renderKids();
+}
+
+/* ===== お子さん登録（年齢自動計算） ===== */
+function ageStr(birth){
+  const p=birth.split('-'),by=+p[0],bm=+p[1];const now=new Date();
+  let mo=(now.getFullYear()*12+now.getMonth()+1)-(by*12+bm);
+  if(mo<0)mo=0;const y=Math.floor(mo/12),m=mo%12;
+  return y+'歳'+m+'ヶ月';
+}
+function renderKids(){
+  const list=$('kidlist');if(!list)return;
+  if(!Array.isArray(db.children))db.children=[];
+  list.innerHTML=db.children.map(c=>
+    '<div class="li"><span style="font-size:20px">👶</span>'+
+    '<div class="lm"><b>'+esc(c.name)+'</b><small class="kidage">'+ageStr(c.birth)+' ・ '+esc(c.birth.replace('-','年')+'月生')+'</small></div>'+
+    '<button class="xdel" data-id="'+c.id+'">✕</button></div>').join('')||
+    '<div class="empty">まだ登録がありません（任意）</div>';
+  list.querySelectorAll('.xdel').forEach(b=>b.onclick=()=>{
+    db.children=db.children.filter(c=>c.id!==b.dataset.id);persist();renderKids();});
+}
+$('kidAdd').onclick=()=>{
+  const name=$('kidName').value.trim(),birth=$('kidBirth').value;
+  if(!name){toast('ニックネームを入れてね');return;}
+  if(!birth){toast('生年月を選んでね');return;}
+  db.children.push({id:'c'+(db.seq++),name:name,birth:birth});
+  $('kidName').value='';$('kidBirth').value='';
+  persist();renderKids();toast('👶 登録しました');
 };
 
 /* ===== 食事 ===== */
@@ -752,7 +902,7 @@ function updateChips(){
 setInterval(()=>{updateCountdown();updateChips();renderHome();},30000);
 
 /* ===== 一括描画 ===== */
-function renderAll(){renderHome();renderSched();renderMeals();renderMap();renderPhotos();renderPack();renderBudget();updateCountdown();}
+function renderAll(){renderHome();renderSched();renderLog();renderMeals();renderMap();renderPhotos();renderPack();renderBudget();updateCountdown();}
 renderAll();
 })();
 </script>
