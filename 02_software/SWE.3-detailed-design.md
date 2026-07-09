@@ -94,9 +94,38 @@ showCapsule(pref):
 ```
 **設計意図**：座標ジオコーディング無しで「日本地図に積み重なる」体験を自己完結で実現（ADR参照）。
 
+## SWD-story（StoryService, Stop 3）
+割当：SWR-STORY-01〜06 / SWR-WORKER-01
+```
+buildStoryPayload(tr):                # 最小化（SWR-STORY-02）
+  moments ← logのk別件数
+  timeline ← schedule(予定) + logs(実績:時刻,種別名,memo) を時刻順
+  return { trip:{name,type,pref,dest,start,end},
+           children:[{nick:name, age:ageStr(birth)}],   # ニックネーム+年齢のみ
+           moments, timeline }
+  ※ lat/lng・写真・本名は構築に含めない（意図的除外）
+
+generateStory():                      # 非同期
+  if !db.storyUrl: 同意/設定導線を出す; return         # SWR-STORY-05
+  storyLoading=true → renderStory（「つむいでいます…」）
+  POST db.storyUrl (JSON=buildStoryPayload)
+  ok && data.story → tr.story={text,ts}; persist        # SWR-STORY-04
+  失敗 → toast（既存storyと他機能は保持）                # SWR-STORY-06
+  finally storyLoading=false → renderStory
+
+renderStory():
+  URL未設定 → 設定入力(setrow)+手順案内
+  URL有り   → 同意文 + 「物語を作る/作り直す」ボタン
+  tr.story有り → 物語本文と生成日時を表示
+```
+Worker側（`worker/story-worker.js`）：OPTIONSでCORSプリフライト応答、POSTで
+`buildPrompt(payload)`→Gemini `generateContent` 呼び出し→`{story}` を返す。
+キーは env.GEMINI_API_KEY（secret）。**プロンプトはWorker側で組む**（改良時にフロント再デプロイ不要）。
+
 ## データ構造（詳細）
 ```
-trip 追加 : pref:string（''=未設定, 例 '神奈川県'）
+trip 追加 : pref:string（''=未設定, 例 '神奈川県'）, story?:{text:string, ts:epoch_ms}（Stop3）
+db 追加   : storyUrl:string（AI中継WorkerのURL, ''=未設定）（Stop3）
 log      : { id:'l'+ts+'_'+rand, k:MOMENTS.k, ts:epoch_ms, memo:string, lat?:num, lng?:num }
 child    : { id:'c'+seq, name:string, birth:'YYYY-MM' }
 REGIONS  : [{n:地方名, p:[都道府県…]}] ×8 ／ PREFS: 47件のフラット配列
@@ -111,5 +140,7 @@ REGIONS  : [{n:地方名, p:[都道府県…]}] ×8 ／ PREFS: 47件のフラッ
 | ageStr / renderKids / #kidAdd | `function ageStr(...)` ほか |
 | renderRecap（ふりかえり） | `function renderRecap()` |
 | renderAtlas / prefCounts / showCapsule（ちず） | `function renderAtlas()` ほか |
-| migration | 読み込み直後の `db.trips.forEach(...)`（logs/pref 補完） |
+| renderStory / buildStoryPayload / generateStory（物語） | `function renderStory()` ほか |
+| StoryWorker（別デプロイ） | `03_implementation/worker/story-worker.js` |
+| migration | 読み込み直後の `db.trips.forEach(...)`（logs/pref 補完）＋ `db.storyUrl` 補完 |
 | Router 再集約 | `go(id)` 内 recap/atlas の再render |

@@ -237,6 +237,25 @@
     display:flex;align-items:center;gap:7px}
   .prefset{display:flex;gap:8px;align-items:center;margin-bottom:14px}
   .prefset select{flex:1}
+
+  /* ===== AI物語 ===== */
+  .storycard{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px 18px;
+    box-shadow:var(--shadow);margin-bottom:14px}
+  .storycard .sh{font-family:var(--serif);font-size:16px;font-weight:700;display:flex;align-items:center;gap:7px;margin-bottom:8px}
+  .storytext{font-family:var(--serif);font-size:14.5px;line-height:1.95;color:var(--ink);white-space:pre-wrap;
+    background:var(--bg2);border-radius:12px;padding:14px 15px;margin:4px 0 10px}
+  .storymeta{font-size:11px;color:var(--sub);margin-bottom:8px}
+  .storybtn{background:linear-gradient(135deg,var(--green),var(--green2));color:#fff;border:none;border-radius:12px;
+    padding:12px 16px;font-weight:800;font-size:14px;cursor:pointer;width:100%}
+  .storybtn:disabled{opacity:.6;cursor:default}
+  .storybtn.ghost{background:var(--bg2);color:var(--ink);border:1px solid var(--line)}
+  .consent{font-size:11px;color:var(--sub);line-height:1.7;margin:8px 2px}
+  .setrow{display:flex;gap:8px;margin-top:8px}
+  .setrow input{flex:1;border:1px solid var(--line);border-radius:10px;padding:9px 11px;font-size:13px;
+    background:var(--bg2);color:var(--ink);min-width:0}
+  .setrow input:focus{outline:2px solid var(--green2)}
+  .setrow button{flex:none;background:var(--green);color:var(--ongreen);border:none;border-radius:10px;padding:0 14px;font-weight:800;cursor:pointer}
+  .setlink{font-size:11px;color:var(--sky);text-decoration:underline;background:none;border:none;cursor:pointer;padding:0}
 </style>
 </head>
 <body>
@@ -345,6 +364,7 @@
   <div class="editorial">LOOK BACK</div>
   <div class="sec-title">📖 ふりかえり</div>
   <div class="sec-sub">しおり（予定）と、きろく（実績）を時系列でひとつに。旅の記録になります。</div>
+  <div id="storyslot"></div>
   <div id="recapbody"></div>
 </section>
 
@@ -560,6 +580,7 @@ if(!db||!Array.isArray(db.trips)){
 }
 if(!db.seq)db.seq=db.trips.length+1;
 if(!Array.isArray(db.children))db.children=[];
+if(typeof db.storyUrl!=='string')db.storyUrl='';
 db.trips.forEach(t=>{if(!Array.isArray(t.logs))t.logs=[];if(typeof t.pref!=='string')t.pref='';});
 
 let tT;
@@ -823,6 +844,72 @@ function renderRecap(){
     '<span class="tag2 '+(it.kind==='rec'?'rec':'plan')+'">'+(it.kind==='rec'?'記録':'予定')+'</span></div>').join('')+'</div>')
     : '<div class="empty">予定やきろくがここに時系列で並びます。<br>スケジュールを入れ、当日きろくを押してみよう。</div>';
   body.innerHTML=head+tl;
+  renderStory();
+}
+
+/* ===== AI物語（Cloudflare Worker + Gemini） ===== */
+let storyLoading=false, storySetup=false;
+function buildStoryPayload(tr){
+  const cnt={};(tr.logs||[]).forEach(l=>cnt[l.k]=(cnt[l.k]||0)+1);
+  const timeline=[];
+  sortedEvents(tr).forEach(o=>timeline.push({t:o.e.t,kind:'plan',title:o.e.title,note:o.e.note||''}));
+  (tr.logs||[]).forEach(l=>{const m=MOMENT_MAP[l.k]||{n:l.k};const d=new Date(l.ts);
+    timeline.push({t:pad(d.getHours())+':'+pad(d.getMinutes()),kind:'rec',title:m.n,note:l.memo||''});});
+  timeline.sort((a,b)=>a.t.localeCompare(b.t));
+  // プライバシー最小化：GPS座標(lat/lng)・写真は意図的に含めない
+  return {
+    trip:{name:tr.name,type:tr.type,pref:tr.pref||'',dest:tr.dest||'',start:tr.start,end:tr.end},
+    children:(db.children||[]).map(c=>({nick:c.name,age:ageStr(c.birth)})),
+    moments:cnt,
+    timeline:timeline
+  };
+}
+function renderStory(){
+  const tr=T();const slot=$('storyslot');if(!slot){return;}
+  if(!tr){slot.innerHTML='';return;}
+  const hasUrl=!!db.storyUrl;
+  const story=tr.story;
+  let h='<div class="storycard"><div class="sh">📖 家族の物語</div>';
+  if(story&&story.text){
+    h+='<div class="storymeta">🕊 '+new Date(story.ts).toLocaleString('ja-JP')+' 生成</div>'+
+       '<div class="storytext">'+esc(story.text)+'</div>';
+  }
+  if(storyLoading){
+    h+='<button class="storybtn" disabled>✍️ 物語をつむいでいます…</button>';
+  }else if(hasUrl){
+    h+='<button class="storybtn" id="genStory">'+(story?'📖 作り直す':'📖 物語を作る')+'</button>'+
+       '<div class="consent">※ 場所名・メモ・きろく・子のニックネームと年齢をAIに送信します。'+
+       '<b>GPS座標・写真・本名は送りません。</b> '+
+       '<button class="setlink" id="showSetup">設定を変更</button></div>';
+  }else{
+    h+='<div class="consent">物語生成には、無料のGemini中継サーバ（Cloudflare Worker）のURL設定が必要です。'+
+       '手順は <code>03_implementation/worker/README.md</code>。</div>';
+    storySetup=true;
+  }
+  if(storySetup){
+    h+='<div class="setrow"><input id="storyUrlIn" type="url" placeholder="https://xxx.workers.dev" value="'+esc(db.storyUrl)+'">'+
+       '<button id="saveStoryUrl">保存</button></div>';
+  }
+  h+='</div>';
+  slot.innerHTML=h;
+  const g=$('genStory');if(g)g.onclick=generateStory;
+  const ss=$('showSetup');if(ss)ss.onclick=()=>{storySetup=!storySetup;renderStory();};
+  const sv=$('saveStoryUrl');if(sv)sv.onclick=()=>{
+    db.storyUrl=($('storyUrlIn').value||'').trim();storySetup=false;persist(false);
+    renderStory();toast(db.storyUrl?'✅ URLを保存しました':'URLを空にしました');};
+}
+async function generateStory(){
+  const tr=T();if(!tr)return;
+  if(!db.storyUrl){toast('先にWorker URLを設定してね');storySetup=true;renderStory();return;}
+  storyLoading=true;renderStory();
+  try{
+    const r=await fetch(db.storyUrl,{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(buildStoryPayload(tr))});
+    let data={};try{data=await r.json();}catch(e){}
+    if(!r.ok||!data.story)throw new Error(data.error||('生成に失敗（'+r.status+'）'));
+    tr.story={text:data.story,ts:Date.now()};persist(false);toast('📖 物語ができました');
+  }catch(e){toast('⚠️ '+(e.message||'生成に失敗しました'));}
+  finally{storyLoading=false;renderStory();}
 }
 
 /* ===== 都道府県ヒストリー ===== */
