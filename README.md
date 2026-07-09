@@ -54,14 +54,15 @@
 
 ## 配信（GitHub Pages）
 
-`03_implementation/` を Pages で公開する。ブランチソースは root か `/docs` しか
-選べず番号付きフォルダを配信できないため、**GitHub Actions 方式**を使う
-（`.github/workflows/deploy-pages.yml`）。有効化手順：
+**ブランチ配信（Deploy from a branch / root）** を使う。リポジトリ全体をパスで配信するので、
+将来 `main` リポジトリに複数のアプリを置いてもパスで共存できる（GitHub Actions 方式だと
+特定フォルダだけをルート化してしまい、複数アプリと競合するため採用しない）。
 
-1. GitHub の対象リポジトリ → **Settings** → 左メニュー **Pages**
-2. **Build and deployment › Source** を **「GitHub Actions」** に変更
-3. `main` に push（またはマージ）すると `deploy-pages` ワークフローが走る
-4. 数十秒後、**https://hosoyama0909.github.io/main/** で公開（ActionsタブやPages画面でURL確認可）
+- **設定**：Settings → Pages → Build and deployment → Source =「Deploy from a branch」
+  → Branch: `main` / Folder: `/ (root)` → Save
+- **入口**：リポジトリ直下の `index.html` が本体 `03_implementation/index.html` へ転送する。
+  そのため **https://hosoyama0909.github.io/main/** でこのアプリが開く。
+- **本体URL（直接）**：`https://hosoyama0909.github.io/main/03_implementation/index.html`
+- 他のアプリを足すときは `別フォルダ/` に置けば `…/main/別フォルダ/` で配信される。
 
-> このワークフローは `03_implementation` の中身をサイトのルートとして配信するので、
-> `index.html` はURL直下で開ける。手動配信は Actions タブ → deploy-pages → Run workflow。
+> 更新は `main` への push/マージだけで自動反映（ブランチ配信の標準動作）。数十秒〜数分で反映。
