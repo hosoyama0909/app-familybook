@@ -2,6 +2,17 @@
 
 構成管理（SUP.8）のリリース記録。各 Stop 完了時に追記し、Git タグを打つ。
 
+## [v0.3 - stop3] 2026-07-09 — AI物語（Pages + Cloudflare Worker + Gemini）
+### Added
+- 📖 ふりかえりに「物語を作る」：おでかけデータからAIが物語文を生成・保存・再表示（SWR-STORY-01,04）
+- 中継 Cloudflare Worker（`03_implementation/worker/`）：Geminiキーを秘匿しCORS付きで代理呼び出し（SWR-WORKER-01）
+- プライバシー最小化＋同意：GPS座標・写真・本名は送らない（SYR-N7 / SWR-STORY-02,03）
+- Worker URL 設定UI、未設定/失敗/オフライン時の劣化（SWR-STORY-05,06）
+- CR: #7。新要求 SYR-16 / N7〜N9、QTC-STORY-* で検証（全6件Pass, 既存回帰維持）
+### Notes
+- 初めて「外部送信なし(SYR-N2)」を条件付きで変更（AI利用時のみ最小化送信）。ADRとリスクに記録。
+- Worker↔Gemini の実疎通はデプロイ後 curl で手動確認（`worker/README.md`）。
+
 ## [v0.2 - stop2] 2026-07-09 — 帰宅後「ふりかえり」と「都道府県ヒストリー」
 ### Added
 - 📖 ふりかえりタブ：予定(しおり)と実績(きろく)を時系列統合表示＋サマリー（SWR-REC-01〜03）

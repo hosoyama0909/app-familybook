@@ -32,6 +32,7 @@ node 04_test/qualification/log-feature.mjs
 |--------|----------|------|
 | log-feature.mjs | きろく機能・お子さん登録・保持・回帰 | `02_software/SWE.5-6-integration-qualification-test.md` |
 | stop2-recap-atlas.mjs | ふりかえり・都道府県ヒストリー・回帰 | `02_software/SWE.5-6-integration-qualification-test.md` |
+| stop3-story.mjs | AI物語のクライアント統合（Worker応答はモック）・回帰 | `02_software/SWE.5-6-integration-qualification-test.md` |
 
 ## TODO
 - `unit/` に `ageStr` 等の純関数テストを追加（DOM非依存）。

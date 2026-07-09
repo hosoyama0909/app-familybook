@@ -1,0 +1,14 @@
+# Cloudflare Worker 設定（物語生成）
+# デプロイ手順は同フォルダの README.md を参照。
+name = "odekake-story"
+main = "story-worker.js"
+compatibility_date = "2024-11-01"
+
+# 公開元の制限（推奨）: 自分の GitHub Pages URL に変える
+# 例: "https://hosoyama0909.github.io"  ・ 開発中は "*" でも可
+[vars]
+ALLOW_ORIGIN = "*"
+GEMINI_MODEL = "gemini-2.0-flash"
+
+# 秘密鍵はここには書かない。以下のコマンドで登録する:
+#   npx wrangler secret put GEMINI_API_KEY

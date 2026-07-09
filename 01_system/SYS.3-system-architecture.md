@@ -41,17 +41,35 @@
 | 状態を単一オブジェクト `db` に集約し都度 `persist()` | 実装単純・一貫性確保 | SWE.2 の DataStore |
 | 位置取得は「記録を先に確定→座標は後から非同期付与」 | 拒否・遅延でも記録を止めない（SYR-N3） | SWD-recordMoment |
 | おでかけ単位に `logs[]` を内包 | 旅と記録の紐付け・共有時に一括移動 | データモデル |
+| **AI生成は中継サーバ(Cloudflare Worker)経由で Gemini を呼ぶ**（Stop 3） | **APIキーをクライアントに出さない（SYR-N8）／将来の他家族配布に対応** | worker/ + StoryService |
+| **AI送信は最小化＋同意**（Stop 3） | **子どものデータを扱うため（SYR-N7）。Gemini無料枠の学習利用に配慮** | buildStoryPayload |
+| **Leaflet/OSMではなく都道府県ボード**（Stop 2） | **オフライン自己完結・外部タイル依存回避** | AtlasView |
+
+## AI連携アーキ（Stop 3 で追加）
+
+```
+[ブラウザ: Pages のPWA]  ──① 最小化データ(JSON) POST──▶ [Cloudflare Worker]
+   （キーは持たない）                                    │ GEMINI_API_KEY を secret 保持
+                                                        │ ② プロンプト整形
+                          ◀───④ 物語テキスト(+CORS)──── │ ③ Gemini API 呼び出し（無料枠）
+                                                        ▼
+                                                 [Google Gemini API]
+```
+- 送信データ（最小化）：trip名/都道府県/行き先/日付、子のニックネーム＋年齢、イベント集計、予定＋記録の時系列（メモ含む）。**GPS座標・写真・本名は送らない**（SYR-N7）。
+- 生成結果は `trip.story` に保存し端末内で再表示。中継URL(`storyUrl`)未設定・失敗時は既存機能を維持（SYR-N9）。
 
 ## データモデル（システムレベル）
 
 ```
 db
-├─ trips[] : { id, name, type, dest, start, end,
+├─ trips[] : { id, name, type, dest, pref, start, end,     ← pref: Stop 2 で追加
 │              schedule[], meals[], spots[], pack[], budget[], photos[],
-│              logs[] }         ← Stop 1 で追加
+│              logs[],                                       ← Stop 1 で追加
+│              story?:{text,ts} }                            ← Stop 3 で追加
 ├─ children[] : { id, name, birth('YYYY-MM') }   ← Stop 1 で追加
 ├─ active : 選択中 trip の id
 ├─ theme  : 'light' | 'dark' | null
+├─ storyUrl : AI中継Worker の URL（''=未設定）  ← Stop 3 で追加
 └─ seq    : ID採番カウンタ
 ```
 

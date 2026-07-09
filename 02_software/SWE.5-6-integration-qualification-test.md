@@ -32,6 +32,20 @@
 | QTC-PREF-03 | 都道府県を東京に変更 | 東京が色付き・保存に反映 | SWR-PREF-01 | ✅ Pass |
 | QTC-REG-02 | スケジュール回帰 | 既存予定が従来通り描画 | SWR-CORE-01 | ✅ Pass |
 
+### Stop 3（AI物語・クライアント統合）— `04_test/qualification/stop3-story.mjs`
+
+Worker/Gemini本体は外部依存のため、**Worker応答をモック**してフロント統合を検証。
+
+| ID | シナリオ | 期待結果 | 割当(SWR/SYR) | 結果 |
+|----|----------|----------|---------------|------|
+| QTC-STORY-01 | URL設定後に生成 | 物語が表示される | SWR-STORY-01,04 | ✅ Pass |
+| QTC-STORY-02 | 送信ペイロード検査 | lat/lng・本名を含まず、メモは含む | SWR-STORY-02 / SYR-N7 | ✅ Pass |
+| QTC-STORY-03 | 生成後リロード | trip.story が保持される | SWR-STORY-04 | ✅ Pass |
+| QTC-STORY-04 | 生成が502失敗 | クラッシュせず既存物語を保持 | SWR-STORY-06 / SYR-N9 | ✅ Pass |
+| QTC-REG-03 | スケジュール回帰 | 既存予定が描画 | SWR-CORE-01 | ✅ Pass |
+
+> 実データでの Worker↔Gemini 疎通は、デプロイ後に `worker/README.md` の curl で手動確認する。
+
 ## 実行記録
 Stop 1（2026-07-09）
 ```
