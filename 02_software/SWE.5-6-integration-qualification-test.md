@@ -38,6 +38,7 @@ Worker/Gemini本体は外部依存のため、**Worker応答をモック**して
 
 | ID | シナリオ | 期待結果 | 割当(SWR/SYR) | 結果 |
 |----|----------|----------|---------------|------|
+| QTC-AWARD-01 | きろく後にふりかえり表示 | あるある大賞（MVP等）が表示される | SWR-AWARD-01 | ✅ Pass |
 | QTC-STORY-01 | URL設定後に生成 | 物語が表示される | SWR-STORY-01,04 | ✅ Pass |
 | QTC-STORY-02 | 送信ペイロード検査 | lat/lng・本名を含まず、メモは含む | SWR-STORY-02 / SYR-N7 | ✅ Pass |
 | QTC-STORY-03 | 生成後リロード | trip.story が保持される | SWR-STORY-04 | ✅ Pass |
