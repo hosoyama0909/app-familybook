@@ -18,21 +18,21 @@
 
 | ID | プロセス | このリポジトリでの成果物 |
 |----|----------|--------------------------|
-| SYS.1 | 要求抽出 | `system/SYS.1-stakeholder-requirements.md` |
-| SYS.2 | システム要求分析 | `system/SYS.2-system-requirements.md` |
-| SYS.3 | システムアーキ設計 | `system/SYS.3-system-architecture.md` |
-| SYS.5 | システム適格性確認テスト | `software/SWE.5-6-integration-qualification-test.md`（統合） |
-| SWE.1 | ソフトウェア要求分析 | `software/SWE.1-software-requirements.md` |
-| SWE.2 | ソフトウェアアーキ設計 | `software/SWE.2-software-architecture.md` |
-| SWE.3 | 詳細設計・実装 | `software/SWE.3-detailed-design.md` ＋ `/index.html` |
-| SWE.4 | ソフトウェア単体検証 | `software/SWE.4-unit-verification.md` |
-| SWE.5 | 結合・結合テスト | `software/SWE.5-6-integration-qualification-test.md` |
-| SWE.6 | ソフトウェア適格性確認テスト | 同上 ＋ `/test/` |
-| SUP.8 | 構成管理 | `management/SUP.8-9-10-supporting-processes.md`（＝Git運用） |
+| SYS.1 | 要求抽出 | `01_system/SYS.1-stakeholder-requirements.md` |
+| SYS.2 | システム要求分析 | `01_system/SYS.2-system-requirements.md` |
+| SYS.3 | システムアーキ設計 | `01_system/SYS.3-system-architecture.md` |
+| SYS.5 | システム適格性確認テスト | `02_software/SWE.5-6-integration-qualification-test.md`（統合） |
+| SWE.1 | ソフトウェア要求分析 | `02_software/SWE.1-software-requirements.md` |
+| SWE.2 | ソフトウェアアーキ設計 | `02_software/SWE.2-software-architecture.md` |
+| SWE.3 | 詳細設計・実装 | `02_software/SWE.3-detailed-design.md` ＋ `03_implementation/index.html` |
+| SWE.4 | ソフトウェア単体検証 | `02_software/SWE.4-unit-verification.md` |
+| SWE.5 | 結合・結合テスト | `02_software/SWE.5-6-integration-qualification-test.md` |
+| SWE.6 | ソフトウェア適格性確認テスト | 同上 ＋ `04_test/` |
+| SUP.8 | 構成管理 | `06_management/SUP.8-9-10-supporting-processes.md`（＝Git運用） |
 | SUP.9 | 問題解決管理 | 同上（＝Issue/バグ管理） |
 | SUP.10 | 変更依頼管理 | 同上（＝Change Request/PR） |
-| MAN.3 | プロジェクト管理 | `management/MAN.3-project-management.md` |
-| MAN.5 | リスク管理 | `management/MAN.5-risk-management.md` |
+| MAN.3 | プロジェクト管理 | `06_management/MAN.3-project-management.md` |
+| MAN.5 | リスク管理 | `06_management/MAN.5-risk-management.md` |
 
 ## テーラリング（何を残し、何を省いたか）
 
@@ -40,7 +40,7 @@
 
 ### 残す（骨格）
 - **双方向トレーサビリティ**：STK → SYR → SWR → SWA → SWD → 実装 → テスト を
-  ID で相互リンク（`traceability/traceability-matrix.md`）。A-SPICE の肝。
+  ID で相互リンク（`05_traceability/traceability-matrix.md`）。A-SPICE の肝。
 - **V字の各段の成果物**：要求・アーキ・設計・検証を文書化。
 - **構成管理（SUP.8）**：Git のブランチ運用・タグ・コミット規約で代替。
 - **問題管理・変更管理（SUP.9/10）**：GitHub Issue / PR で運用。
@@ -61,8 +61,8 @@
 1. **変更依頼（CR）を起票**（GitHub Issue）— 何を・なぜ。
 2. **影響する要求を更新**（SYS.2 / SWE.1）— ID を採番。
 3. **アーキ・設計に反映**（SWE.2 / SWE.3）。
-4. **実装**（`/index.html`）— コミットに要求ID・CR番号を書く。
-5. **検証**（SWE.4 単体 / SWE.6 適格性 — `/test/`）。
+4. **実装**（`03_implementation/index.html`）— コミットに要求ID・CR番号を書く。
+5. **検証**（SWE.4 単体 / SWE.6 適格性 — `04_test/`）。
 6. **トレーサビリティ更新**（matrix）＋ **レビュー** して merge。
 
 各ロードマップの Stop（Stop 1, Stop 2…）を、この 1〜6 のミニ V字で回す。

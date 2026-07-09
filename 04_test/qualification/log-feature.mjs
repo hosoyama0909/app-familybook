@@ -1,14 +1,14 @@
 /*
  * SWE.6 適格性確認テスト — きろく機能（Stop 1）
  * 対応: QTC-LOG-01/02/03, QTC-CHILD-01, QTC-DATA-01, QTC-REG-01
- * 実行: test/README.md 参照
+ * 実行: 04_test/README.md 参照
  */
 import { chromium } from 'playwright-core';
 import { fileURLToPath } from 'url';
 import { dirname, resolve } from 'path';
 
 const __dir = dirname(fileURLToPath(import.meta.url));
-const APP = 'file://' + resolve(__dir, '../../index.html');
+const APP = 'file://' + resolve(__dir, '../../03_implementation/index.html');
 const EXE = process.env.CHROMIUM_BIN || '/opt/pw-browsers/chromium-1194/chrome-linux/chrome';
 
 const results = [];

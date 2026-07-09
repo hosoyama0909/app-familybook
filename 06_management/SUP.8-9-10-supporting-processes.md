@@ -13,9 +13,9 @@
 ### 構成識別（何をバージョン管理するか）
 | 構成品目 | 場所 |
 |----------|------|
-| 実装 | `/index.html` |
-| 要求・設計・テスト仕様 | `/docs/**` |
-| テストコード | `/test/**` |
+| 実装 | `03_implementation/index.html` |
+| 要求・設計・テスト仕様 | 各 `0X_*` フォルダ（00_process〜06_management） |
+| テストコード | `04_test/**` |
 | リリース記録 | `/CHANGELOG.md`（新設）＋ Git タグ |
 
 ### ベースライン
@@ -36,5 +36,5 @@
 - CR番号は Issue 番号を流用（例：CR-12 = #12）。
 
 ## CI（今後）
-`.github/workflows/` に、push時に `test/qualification/*` を実行するワークフローを追加予定。
+`.github/workflows/` に、push時に `04_test/qualification/*` を実行するワークフローを追加予定。
 これにより SWE.6 の適格性テストを自動ゲート化し、SUP.8 の品質を担保する。

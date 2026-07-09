@@ -5,8 +5,8 @@
 利用者視点の適格性を **実ブラウザ（Playwright/Chromium）E2E** で確認する。
 
 ## テスト対象・環境
-- 対象：`/index.html`（Stop 1 リリース）
-- 実行：`/test/qualification/log-feature.mjs`（Chromium headless, viewport 390×844）
+- 対象：`03_implementation/index.html`（Stop 1 リリース）
+- 実行：`04_test/qualification/log-feature.mjs`（Chromium headless, viewport 390×844）
 - 実行方法：`test/README.md` を参照。
 
 ## 適格性テストケース
@@ -31,7 +31,7 @@
 → 全ケース Pass。コンソールエラー無し。既存機能の回帰無し。
 
 ## トレーサビリティ
-全 QTC は `traceability/traceability-matrix.md` で SWR/SYR/STK まで遡れる。
+全 QTC は `05_traceability/traceability-matrix.md` で SWR/SYR/STK まで遡れる。
 
 ## 未カバー（次リリースで追加）
 - 位置付き記録の🧭ナビリンク遷移（外部遷移のため手動確認）。

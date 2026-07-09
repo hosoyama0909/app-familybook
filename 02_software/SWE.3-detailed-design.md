@@ -1,6 +1,6 @@
 # SWE.3 詳細設計・ユニット構築
 
-実装は `/index.html` の `<script>` 内。ここでは主要ユニットのアルゴリズムを、
+実装は `03_implementation/index.html` の `<script>` 内。ここでは主要ユニットのアルゴリズムを、
 実装と対応付けて記述する（コード自体が構築成果物）。
 
 ## SWD-recordMoment（MomentLogger）
@@ -72,7 +72,7 @@ MOMENTS : [{k,e(emoji),n(名称),cls}] ×6 ／ MOMENT_MAP: k→定義 の辞書
 ```
 
 ## 実装位置（コードへのポインタ）
-| ユニット | index.html 内の関数/ブロック |
+| ユニット | 03_implementation/index.html 内の関数/ブロック |
 |----------|------------------------------|
 | MOMENTS / MOMENT_MAP | `const MOMENTS = [...]` |
 | recordMoment | `function recordMoment(k)` |

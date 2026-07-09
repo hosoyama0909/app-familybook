@@ -55,4 +55,4 @@ db
 └─ seq    : ID採番カウンタ
 ```
 
-ソフトウェア内部の分解は `software/SWE.2-software-architecture.md` へ続く。
+ソフトウェア内部の分解は `02_software/SWE.2-software-architecture.md` へ続く。

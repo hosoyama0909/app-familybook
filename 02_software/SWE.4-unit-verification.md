@@ -1,7 +1,7 @@
 # SWE.4 ソフトウェア単体検証
 
 各ユニット（SWD-*）の検証。現段階は**設計レビュー＋境界値の手動/自動確認**で
-PA1.1（実施）を満たす。将来はユニットテストを `/test/unit/` に自動化する（下記TODO）。
+PA1.1（実施）を満たす。将来はユニットテストを `04_test/unit/` に自動化する（下記TODO）。
 
 ## 単体テストケース
 
@@ -24,7 +24,7 @@ PA1.1（実施）を満たす。将来はユニットテストを `/test/unit/` 
 - [x] 既存レンダリング関数への副作用が無いか（renderAll へ renderLog 追加のみ）
 
 ## TODO（能力レベル向上）
-- [ ] `ageStr` 等の純関数を自動ユニットテスト化（Node, DOM非依存）→ `/test/unit/`
+- [ ] `ageStr` 等の純関数を自動ユニットテスト化（Node, DOM非依存）→ `04_test/unit/`
 - [ ] CI（GitHub Actions）で push 時に自動実行
 
 > 現状 `recordMoment/renderLog` は DOM 依存のため E2E（SWE.6）で検証している。

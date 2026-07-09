@@ -10,7 +10,7 @@
 - 👶 お子さん登録と年齢の自動計算（SWR-CHILD-01〜03）
 - データ保存・後方互換マイグレーション（SWR-DATA-01,02）
 ### Process
-- A-SPICE テーラリング版プロセスを導入。`docs/**`・`test/**` を整備。
+- A-SPICE テーラリング版プロセスを導入。番号付きフォルダ（00_process〜06_management）・`04_test/**` を整備。
 - Stop 1 機能を STK→SYR→SWR→SWA→SWD→実装→テストで完全トレース。
 
 ## [v0.0 - stop0] — 旅アシスト（既存）
