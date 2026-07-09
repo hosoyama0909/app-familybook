@@ -64,18 +64,52 @@ renderLog():
 ```
 seed生成・新規おでかけ作成の双方で `logs:[]` を初期化。
 
+## SWD-renderRecap（RecordView, Stop 2）
+割当：SWR-REC-01, 02, 03
+```
+renderRecap():
+  tr ← T(); if 無し: 空表示; return
+  items ← []
+  schedule各予定 → items.push({dt:evtDate, kind:'plan', ...})   # 予定
+  logs各記録   → items.push({dt:new Date(ts), kind:'rec', ...}) # 実績
+  items を dt 昇順に整列（予定と実績が混ざる）
+  ヘッダに 予定数/きろく数/写真数/イベント集計 を表示
+  各行に kind に応じ「予定/記録」タグを付与（recは強調）
+```
+**設計意図**：予定と実績を同一時間軸で見せ、「しおり→記録」への変化を1画面で表現。
+
+## SWD-renderAtlas / prefCounts / showCapsule（AtlasView, Stop 2）
+割当：SWR-PREF-01〜04
+```
+prefCounts():  db.trips を走査し {pref: 回数} を返す（pref空は除外）
+renderAtlas():
+  counts ← prefCounts(); visited ← counts のキー数; total ← 47
+  リング: 円周に対し visited/total の弧長で stroke-dashoffset を計算（SVG）
+  選択中tripの pref を <select> で変更可 → 変更時 persist + renderAtlas + renderRecap
+  REGIONS(地方) ごとに PREFS を chip 描画。回数 n で濃淡 v1(1)/v2(2)/v3(≥3)
+  chip タップ → showCapsule(pref)
+showCapsule(pref):
+  その pref の trips を開始日順に一覧（各trip: 絵文字/日付/写真数/イベント集計）
+  「開く」で db.active ← trip.id → renderAll → go('recap')
+```
+**設計意図**：座標ジオコーディング無しで「日本地図に積み重なる」体験を自己完結で実現（ADR参照）。
+
 ## データ構造（詳細）
 ```
-log     : { id:'l'+ts+'_'+rand, k:MOMENTS.k, ts:epoch_ms, memo:string, lat?:num, lng?:num }
-child   : { id:'c'+seq, name:string, birth:'YYYY-MM' }
-MOMENTS : [{k,e(emoji),n(名称),cls}] ×6 ／ MOMENT_MAP: k→定義 の辞書
+trip 追加 : pref:string（''=未設定, 例 '神奈川県'）
+log      : { id:'l'+ts+'_'+rand, k:MOMENTS.k, ts:epoch_ms, memo:string, lat?:num, lng?:num }
+child    : { id:'c'+seq, name:string, birth:'YYYY-MM' }
+REGIONS  : [{n:地方名, p:[都道府県…]}] ×8 ／ PREFS: 47件のフラット配列
 ```
 
 ## 実装位置（コードへのポインタ）
 | ユニット | 03_implementation/index.html 内の関数/ブロック |
 |----------|------------------------------|
-| MOMENTS / MOMENT_MAP | `const MOMENTS = [...]` |
+| MOMENTS / MOMENT_MAP / REGIONS / PREFS | 各 `const …` |
 | recordMoment | `function recordMoment(k)` |
 | renderLog / logTime / dayLabel | `function renderLog()` ほか |
 | ageStr / renderKids / #kidAdd | `function ageStr(...)` ほか |
-| migration | 読み込み直後の `db.trips.forEach(...)` |
+| renderRecap（ふりかえり） | `function renderRecap()` |
+| renderAtlas / prefCounts / showCapsule（ちず） | `function renderAtlas()` ほか |
+| migration | 読み込み直後の `db.trips.forEach(...)`（logs/pref 補完） |
+| Router 再集約 | `go(id)` 内 recap/atlas の再render |
