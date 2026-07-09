@@ -190,6 +190,53 @@
   .daysep{font-family:var(--serif);font-size:12.5px;font-weight:700;color:var(--sub);letter-spacing:1px;margin:16px 2px 7px}
   .logi .lt{color:var(--accent);min-width:42px}
   .kidage{font-size:11.5px;color:var(--sub);font-weight:600}
+
+  /* ===== ふりかえり ===== */
+  .recaphead{background:linear-gradient(135deg,var(--green),var(--green2));color:#fff;border-radius:20px;
+    padding:16px 18px;box-shadow:var(--shadow);margin-bottom:14px}
+  .recaphead .re{font-size:30px} .recaphead .rt{font-size:18px;font-weight:800;font-family:var(--serif);margin-top:4px}
+  .recaphead .rd{font-size:12px;opacity:.9;margin-top:2px}
+  .recaphead .rstats{display:flex;gap:14px;margin-top:12px;flex-wrap:wrap}
+  .recaphead .rstats b{font-size:19px;font-family:var(--serif);display:block;font-variant-numeric:tabular-nums}
+  .recaphead .rstats span{font-size:10px;opacity:.85;letter-spacing:1px}
+  .tl{position:relative;margin-left:6px;padding-left:18px}
+  .tl::before{content:"";position:absolute;left:0;top:6px;bottom:6px;width:2px;background:var(--line)}
+  .tlrow{position:relative;padding:8px 0 8px 4px;display:flex;gap:10px;align-items:flex-start}
+  .tlrow::before{content:"";position:absolute;left:-22px;top:13px;width:9px;height:9px;border-radius:50%;
+    background:var(--sky);border:2px solid var(--card)}
+  .tlrow.act::before{background:var(--accent)}
+  .tlrow .tt{font-size:11.5px;font-weight:800;color:var(--sub);min-width:40px;font-variant-numeric:tabular-nums;flex:none}
+  .tlrow .tc{flex:1;min-width:0}
+  .tlrow .tc b{font-size:14px;display:block}
+  .tlrow .tc small{font-size:12px;color:var(--sub)}
+  .tlrow .tag2{font-size:9.5px;font-weight:800;padding:2px 7px;border-radius:8px;flex:none;letter-spacing:.5px}
+  .tag2.plan{background:var(--bg2);color:var(--sky)} .tag2.rec{background:var(--accent);color:#fff}
+
+  /* ===== 都道府県ヒストリー ===== */
+  .atlastop{display:flex;align-items:center;gap:16px;background:var(--card);border:1px solid var(--line);
+    border-radius:20px;padding:16px 18px;box-shadow:var(--shadow);margin-bottom:16px}
+  .ring{position:relative;width:74px;height:74px;flex:none}
+  .ring svg{transform:rotate(-90deg)} .ring .rc{position:absolute;inset:0;display:flex;flex-direction:column;
+    align-items:center;justify-content:center} .ring .rc b{font-size:19px;font-family:var(--serif);line-height:1;font-variant-numeric:tabular-nums}
+  .ring .rc span{font-size:9px;color:var(--sub)}
+  .atlastop .at b{font-size:15px} .atlastop .at p{font-size:12px;color:var(--sub);margin-top:3px}
+  .region{margin-bottom:14px}
+  .region h4{font-family:var(--serif);font-size:13px;font-weight:700;color:var(--sub);letter-spacing:1px;
+    margin:0 2px 7px;display:flex;justify-content:space-between}
+  .region h4 em{font-style:normal;font-size:11px;color:var(--faint,var(--sub))}
+  .prefs{display:flex;flex-wrap:wrap;gap:6px}
+  .pchip{font-size:12.5px;font-weight:700;padding:6px 11px;border-radius:11px;border:1px solid var(--line);
+    background:var(--bg2);color:var(--sub);cursor:pointer;position:relative}
+  .pchip.v1{background:color-mix(in srgb,var(--green2) 22%,var(--card));color:var(--ink);border-color:var(--green2)}
+  .pchip.v2{background:color-mix(in srgb,var(--green2) 48%,var(--card));color:var(--ink);border-color:var(--green2)}
+  .pchip.v3{background:var(--green);color:var(--ongreen);border-color:var(--green)}
+  .pchip .cnt{font-size:10px;font-weight:800;margin-left:4px;opacity:.85}
+  .capsule{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:4px 0;margin-bottom:14px;
+    box-shadow:var(--shadow);overflow:hidden}
+  .capsule .ch{padding:11px 15px;font-weight:800;font-size:13.5px;border-bottom:1px solid var(--line);
+    display:flex;align-items:center;gap:7px}
+  .prefset{display:flex;gap:8px;align-items:center;margin-bottom:14px}
+  .prefset select{flex:1}
 </style>
 </head>
 <body>
@@ -206,6 +253,8 @@
   <button class="tab active" data-page="home">🏠 ホーム</button>
   <button class="tab" data-page="sched">🗓️ スケジュール</button>
   <button class="tab" data-page="log">📝 きろく</button>
+  <button class="tab" data-page="recap">📖 ふりかえり</button>
+  <button class="tab" data-page="atlas">🗾 ちず</button>
   <button class="tab" data-page="meals">🍴 食事</button>
   <button class="tab" data-page="map">📍 マップ</button>
   <button class="tab" data-page="photos">📸 写真</button>
@@ -236,6 +285,7 @@
     </div>
     <div class="frow">
       <div class="grow"><label>行き先（地図検索に使う）</label><input id="ntDest" type="text" placeholder="例：那覇" style="width:100%"></div>
+      <div class="grow"><label>都道府県（地図に記録）</label><select id="ntPref" style="width:100%"></select></div>
     </div>
     <div class="frow">
       <div class="grow"><label>開始日</label><input id="ntStart" type="date" style="width:100%"></div>
@@ -287,6 +337,24 @@
     </div>
     <button class="addbtn" id="kidAdd">＋ お子さんを登録</button>
   </div>
+</section>
+
+<!-- ============ ふりかえり ============ -->
+<section class="page" id="recap">
+  <div class="tripname" id="tn-recap"></div>
+  <div class="editorial">LOOK BACK</div>
+  <div class="sec-title">📖 ふりかえり</div>
+  <div class="sec-sub">しおり（予定）と、きろく（実績）を時系列でひとつに。旅の記録になります。</div>
+  <div id="recapbody"></div>
+</section>
+
+<!-- ============ 都道府県ヒストリー ============ -->
+<section class="page" id="atlas">
+  <div class="editorial">FAMILY ATLAS</div>
+  <div class="sec-title">🗾 家族のちず</div>
+  <div class="sec-sub">行った都道府県が色づきます。家族の人生マップを育てよう。</div>
+  <div class="prefset" id="prefset"></div>
+  <div id="atlasbody"></div>
 </section>
 
 <!-- ============ MEALS ============ -->
@@ -431,9 +499,22 @@ const MOMENTS=[
 ];
 const MOMENT_MAP={};MOMENTS.forEach(m=>MOMENT_MAP[m.k]=m);
 
+/* ===== 都道府県（地方別） ===== */
+const REGIONS=[
+  {n:'北海道',p:['北海道']},
+  {n:'東北',p:['青森県','岩手県','宮城県','秋田県','山形県','福島県']},
+  {n:'関東',p:['茨城県','栃木県','群馬県','埼玉県','千葉県','東京都','神奈川県']},
+  {n:'中部',p:['新潟県','富山県','石川県','福井県','山梨県','長野県','岐阜県','静岡県','愛知県']},
+  {n:'近畿',p:['三重県','滋賀県','京都府','大阪府','兵庫県','奈良県','和歌山県']},
+  {n:'中国',p:['鳥取県','島根県','岡山県','広島県','山口県']},
+  {n:'四国',p:['徳島県','香川県','愛媛県','高知県']},
+  {n:'九州・沖縄',p:['福岡県','佐賀県','長崎県','熊本県','大分県','宮崎県','鹿児島県','沖縄県']}
+];
+const PREFS=REGIONS.reduce((a,r)=>a.concat(r.p),[]); // 47
+
 /* ===== 初期データ（箱根） ===== */
 function seedHakone(){
-  return {id:'t'+1,name:'箱根旅行',type:'onsen',dest:'箱根',start:'2026-07-10',end:'2026-07-11',
+  return {id:'t'+1,name:'箱根旅行',type:'onsen',dest:'箱根',pref:'神奈川県',start:'2026-07-10',end:'2026-07-11',
     schedule:[
       {d:'2026-07-10',t:'08:00',title:'自宅を出発',note:'休憩しながら箱根へ（約3時間）',map:''},
       {d:'2026-07-10',t:'11:00',title:'ユネッサン',note:'水着で温泉パーク・館内で昼食（〜15:00）',map:'箱根小涌園ユネッサン'},
@@ -479,7 +560,7 @@ if(!db||!Array.isArray(db.trips)){
 }
 if(!db.seq)db.seq=db.trips.length+1;
 if(!Array.isArray(db.children))db.children=[];
-db.trips.forEach(t=>{if(!Array.isArray(t.logs))t.logs=[];});
+db.trips.forEach(t=>{if(!Array.isArray(t.logs))t.logs=[];if(typeof t.pref!=='string')t.pref='';});
 
 let tT;
 function persist(show){try{localStorage.setItem(KEY,JSON.stringify(db));if(show!==false)toast('💾 保存しました');}
@@ -522,6 +603,9 @@ function go(id){
   document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id===id));
   document.querySelectorAll('#tabs .tab').forEach(t=>t.classList.toggle('active',t.dataset.page===id));
   document.querySelectorAll('#bnav button').forEach(b=>b.classList.toggle('active',b.dataset.page===id));
+  // ふりかえり/ちず は他タブのデータを集約するため、表示のたびに最新化
+  if(id==='recap')renderRecap();
+  else if(id==='atlas')renderAtlas();
   window.scrollTo({top:0,behavior:'smooth'});
 }
 document.querySelectorAll('#tabs .tab,#bnav button').forEach(el=>el.onclick=()=>go(el.dataset.page));
@@ -531,6 +615,7 @@ let editMode=false;
 $('editTrips').onclick=()=>{editMode=!editMode;renderHome();};
 const typeSel=$('ntType');
 typeSel.innerHTML=Object.keys(TYPES).map(k=>'<option value="'+k+'">'+TYPES[k].e+' '+TYPES[k].n+'</option>').join('');
+$('ntPref').innerHTML='<option value="">未設定</option>'+PREFS.map(p=>'<option value="'+p+'">'+p+'</option>').join('');
 
 function tripBadge(tr){
   const now=new Date(),s=pdate(tr.start),e=new Date(pdate(tr.end).getTime()+86400000);
@@ -566,16 +651,16 @@ function renderHome(){
   $('editTrips').textContent=editMode?'✅ 編集おわり':'✏️ 編集（削除）モード';
 }
 $('ntAdd').onclick=()=>{
-  const name=$('ntName').value.trim(),type=typeSel.value,dest=$('ntDest').value.trim();
+  const name=$('ntName').value.trim(),type=typeSel.value,dest=$('ntDest').value.trim(),pref=$('ntPref').value;
   let s=$('ntStart').value,e=$('ntEnd').value;
   if(!name){toast('名前を入れてね');return;}
   if(!s){toast('開始日を入れてね');return;}
   if(!e||e<s)e=s;
-  const tr={id:'t'+(db.seq++),name:name,type:type,dest:dest,start:s,end:e,
+  const tr={id:'t'+(db.seq++),name:name,type:type,dest:dest,pref:pref,start:s,end:e,
     schedule:[],meals:[],spots:[],photos:[],budget:[],logs:[],
     pack:(TYPES[type]||TYPES.other).pack.concat(BABY).map(x=>({x:x,c:false}))};
   db.trips.push(tr);db.active=tr.id;
-  $('ntName').value='';$('ntDest').value='';$('ntStart').value='';$('ntEnd').value='';
+  $('ntName').value='';$('ntDest').value='';$('ntPref').value='';$('ntStart').value='';$('ntEnd').value='';
   persist();renderAll();go('sched');toast('「'+name+'」を作成！予定を入れていこう');
 };
 
@@ -706,6 +791,86 @@ $('kidAdd').onclick=()=>{
   $('kidName').value='';$('kidBirth').value='';
   persist();renderKids();toast('👶 登録しました');
 };
+
+/* ===== ふりかえり（しおり→旅の記録） ===== */
+function renderRecap(){
+  const tr=T();const body=$('recapbody');
+  if(!tr){$('recapbody').innerHTML='<div class="empty">ホームでおでかけを作成してください</div>';return;}
+  tripHeader('tn-recap');
+  const ty=TYPES[tr.type]||TYPES.other;
+  if(!Array.isArray(tr.logs))tr.logs=[];
+  // 統合タイムライン：予定(schedule) と 実績(logs) を datetime で混ぜる
+  const items=[];
+  sortedEvents(tr).forEach(o=>items.push({dt:evtDate(o.e),kind:'plan',t:o.e.t,title:o.e.title,note:o.e.note}));
+  tr.logs.forEach(l=>{const m=MOMENT_MAP[l.k]||{e:'•',n:l.k};const d=new Date(l.ts);
+    items.push({dt:d,kind:'rec',t:pad(d.getHours())+':'+pad(d.getMinutes()),title:m.e+' '+m.n,note:l.memo});});
+  items.sort((a,b)=>a.dt-b.dt);
+  // 集計
+  const cnt={};tr.logs.forEach(l=>cnt[l.k]=(cnt[l.k]||0)+1);
+  const sumChips=MOMENTS.filter(m=>cnt[m.k]).map(m=>m.e+cnt[m.k]).join(' ')||'—';
+  const head='<div class="recaphead"><div class="re">'+ty.e+'</div>'+
+    '<div class="rt">'+esc(tr.name)+'</div>'+
+    '<div class="rd">'+esc(tr.start)+' 〜 '+esc(tr.end)+(tr.pref?' ・ '+esc(tr.pref):'')+(tr.dest?'（'+esc(tr.dest)+'）':'')+'</div>'+
+    '<div class="rstats">'+
+      '<div><b>'+tr.schedule.length+'</b><span>よてい</span></div>'+
+      '<div><b>'+tr.logs.length+'</b><span>きろく</span></div>'+
+      '<div><b>'+tr.photos.length+'</b><span>しゃしん</span></div>'+
+      '<div style="min-width:90px"><b style="font-size:15px">'+sumChips+'</b><span>できごと</span></div>'+
+    '</div></div>';
+  const tl=items.length?('<div class="tl">'+items.map(it=>
+    '<div class="tlrow'+(it.kind==='rec'?' act':'')+'"><span class="tt">'+esc(it.t)+'</span>'+
+    '<div class="tc"><b>'+esc(it.title)+'</b>'+(it.note?'<small>'+esc(it.note)+'</small>':'')+'</div>'+
+    '<span class="tag2 '+(it.kind==='rec'?'rec':'plan')+'">'+(it.kind==='rec'?'記録':'予定')+'</span></div>').join('')+'</div>')
+    : '<div class="empty">予定やきろくがここに時系列で並びます。<br>スケジュールを入れ、当日きろくを押してみよう。</div>';
+  body.innerHTML=head+tl;
+}
+
+/* ===== 都道府県ヒストリー ===== */
+function prefCounts(){const c={};db.trips.forEach(t=>{if(t.pref)c[t.pref]=(c[t.pref]||0)+1;});return c;}
+function renderAtlas(){
+  const counts=prefCounts();
+  const visited=Object.keys(counts).length, total=PREFS.length;
+  const pct=Math.round(visited/total*100), circ=2*Math.PI*32, off=circ*(1-visited/total);
+  // 現在のおでかけの都道府県設定UI
+  const tr=T();
+  if(tr){
+    $('prefset').innerHTML='<span style="font-size:12px;color:var(--sub);font-weight:700;flex:none">'+
+      esc(tr.name)+' の都道府県</span><select id="prefSel"></select>';
+    const sel=$('prefSel');
+    sel.innerHTML='<option value="">未設定</option>'+PREFS.map(p=>'<option value="'+p+'"'+(p===tr.pref?' selected':'')+'>'+p+'</option>').join('');
+    sel.onchange=()=>{tr.pref=sel.value;persist(false);renderAtlas();renderRecap();toast(sel.value?'📍 '+sel.value+' に記録':'未設定にしました');};
+  }else{$('prefset').innerHTML='';}
+  const top='<div class="atlastop"><div class="ring">'+
+    '<svg width="74" height="74"><circle cx="37" cy="37" r="32" fill="none" stroke="var(--line)" stroke-width="7"/>'+
+    '<circle cx="37" cy="37" r="32" fill="none" stroke="var(--green2)" stroke-width="7" stroke-linecap="round" '+
+    'stroke-dasharray="'+circ.toFixed(1)+'" stroke-dashoffset="'+off.toFixed(1)+'"/></svg>'+
+    '<div class="rc"><b>'+visited+'<span style="font-size:11px">/'+total+'</span></b><span>制覇</span></div></div>'+
+    '<div class="at"><b>🗾 '+pct+'% 制覇</b><p>行った都道府県：'+visited+'／'+total+'<br>次はどこへ行こう？</p></div></div>';
+  const regionsHtml=REGIONS.map(r=>{
+    const done=r.p.filter(p=>counts[p]).length;
+    const chips=r.p.map(p=>{const n=counts[p]||0;const cls=n>=3?'v3':n===2?'v2':n>=1?'v1':'';
+      return '<button class="pchip '+cls+'" data-pref="'+p+'">'+esc(p.replace(/[都道府県]$/,''))+
+        (n?'<span class="cnt">'+n+'</span>':'')+'</button>';}).join('');
+    return '<div class="region"><h4>'+r.n+'<em>'+done+'/'+r.p.length+'</em></h4><div class="prefs">'+chips+'</div></div>';
+  }).join('');
+  $('atlasbody').innerHTML=top+regionsHtml+'<div id="capsuleslot"></div>';
+  $('atlasbody').querySelectorAll('.pchip').forEach(b=>b.onclick=()=>showCapsule(b.dataset.pref));
+}
+function showCapsule(pref){
+  const trips=db.trips.filter(t=>t.pref===pref).sort((a,b)=>a.start.localeCompare(b.start));
+  const slot=$('capsuleslot');
+  if(!trips.length){slot.innerHTML='<div class="capsule"><div class="ch">📍 '+esc(pref)+'</div>'+
+    '<div class="empty">まだ記録がありません。ここへ行ったら都道府県を設定しよう。</div></div>';return;}
+  slot.innerHTML='<div class="capsule"><div class="ch">📍 '+esc(pref)+' のタイムカプセル（'+trips.length+'回）</div>'+
+    trips.map(t=>{const ty=TYPES[t.type]||TYPES.other;const cnt={};(t.logs||[]).forEach(l=>cnt[l.k]=(cnt[l.k]||0)+1);
+      const sum=MOMENTS.filter(m=>cnt[m.k]).map(m=>m.e+cnt[m.k]).join(' ');
+      return '<div class="li" data-open="'+t.id+'"><span class="te" style="font-size:22px">'+ty.e+'</span>'+
+        '<div class="lm"><b>'+esc(t.name)+'</b><small>'+esc(t.start)+' ・ 📸'+(t.photos||[]).length+
+        (sum?' ・ '+sum:'')+'</small></div><span class="navb">📖 開く</span></div>';}).join('')+'</div>';
+  slot.querySelectorAll('[data-open]').forEach(el=>el.onclick=()=>{
+    db.active=el.dataset.open;persist(false);renderAll();go('recap');});
+  slot.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
 
 /* ===== 食事 ===== */
 function renderMeals(){
@@ -902,7 +1067,7 @@ function updateChips(){
 setInterval(()=>{updateCountdown();updateChips();renderHome();},30000);
 
 /* ===== 一括描画 ===== */
-function renderAll(){renderHome();renderSched();renderLog();renderMeals();renderMap();renderPhotos();renderPack();renderBudget();updateCountdown();}
+function renderAll(){renderHome();renderSched();renderLog();renderRecap();renderAtlas();renderMeals();renderMap();renderPhotos();renderPack();renderBudget();updateCountdown();}
 renderAll();
 })();
 </script>

@@ -46,7 +46,9 @@
 | MomentLogger | イベント記録の生成 | `recordMoment(k)`, `MOMENTS`, `MOMENT_MAP` | SWR-LOG-01〜04 |
 | LogView | 記録の集計・タイムライン描画 | `renderLog()`, `logTime()`, `dayLabel()` | SWR-LOG-05,06,07,08 |
 | ChildRegistry | お子さん登録と年齢算出 | `renderKids()`, `ageStr(birth)`, `#kidAdd` | SWR-CHILD-01,02,03 |
-| Router | 画面遷移 | `go(id)` | SYR-N4 |
+| RecordView（Stop2） | 予定+実績の統合ふりかえり描画 | `renderRecap()` | SWR-REC-01,02,03 |
+| AtlasView（Stop2） | 都道府県の集計・塗り分け・タイムカプセル | `renderAtlas()`, `prefCounts()`, `showCapsule(pref)`, `REGIONS/PREFS` | SWR-PREF-01〜04 |
+| Router | 画面遷移。recap/atlas は表示時に再集約 | `go(id)`（recap/atlasで再render） | SYR-N4, SWR-REC/PREF |
 | TripManager 他 View | 既存機能（回帰対象） | `renderHome/Sched/...` | SWR-CORE-01 |
 
 ## 静的・動的側面
