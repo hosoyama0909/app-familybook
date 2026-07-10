@@ -192,6 +192,21 @@
   .ltedit{flex:none;border:1px solid var(--line);border-radius:9px;background:var(--bg2);color:var(--accent);
     font-weight:800;font-size:12.5px;padding:5px 6px;font-family:inherit;width:78px;font-variant-numeric:tabular-nums}
   .ltedit:focus{outline:2px solid var(--green2)}
+  .lgtop{display:flex;gap:8px;margin-bottom:12px}
+  .lgchildsel{flex:none;max-width:42%;border:1px solid var(--line);border-radius:12px;padding:10px 10px;font-size:13px;
+    font-family:inherit;background:var(--bg2);color:var(--ink)}
+  .lgchildsel:focus{outline:2px solid var(--green2)}
+  .lgtop .memoin{flex:1;margin-bottom:0}
+  /* 編集できる記録カード */
+  .logc{padding:10px 12px;border-bottom:1px solid var(--line)}
+  .logc:last-child{border-bottom:none}
+  .logc-top{display:flex;align-items:center;gap:9px}
+  .logc-label{flex:1;font-size:14.5px;font-weight:800;min-width:0}
+  .lchild{flex:none;border:1px solid var(--line);border-radius:9px;background:var(--bg2);color:var(--ink);
+    font-size:12px;padding:5px 6px;font-family:inherit;max-width:96px}
+  .lmemoedit{width:100%;margin-top:7px;border:1px solid var(--line);border-radius:9px;background:var(--bg2);
+    color:var(--ink);font-size:13px;padding:8px 10px;font-family:inherit}
+  .lmemoedit:focus,.lchild:focus{outline:2px solid var(--green2)}
   .kidage{font-size:11.5px;color:var(--sub);font-weight:600}
 
   /* ===== ふりかえり ===== */
@@ -432,7 +447,10 @@
   <div class="editorial">TODAY'S MOMENTS</div>
   <div class="sec-title">📝 今日のきろく</div>
   <div class="sec-sub">おでかけ中はボタンを押すだけ。時刻（と、許可すれば場所）を自動で残します。</div>
-  <input class="memoin" id="lgMemo" type="text" placeholder="ひとことメモ（任意）— 押す前に入れると記録に添えられます">
+  <div class="lgtop">
+    <select id="lgChild" class="lgchildsel" aria-label="だれの記録か"></select>
+    <input class="memoin" id="lgMemo" type="text" placeholder="ひとことメモ（任意）">
+  </div>
   <div class="moments" id="moments"></div>
   <div class="lgsum" id="lgsummary"></div>
   <div id="lglist"></div>
@@ -852,11 +870,15 @@ $('moments').innerHTML=MOMENTS.map(m=>
   '<button class="mbtn '+m.cls+'" data-k="'+m.k+'"><span class="me">'+m.e+'</span>'+m.n+'</button>').join('');
 $('moments').querySelectorAll('.mbtn').forEach(b=>b.onclick=()=>recordMoment(b.dataset.k));
 
+function childName(id){const c=(db.children||[]).find(x=>x.id===id);return c?c.name:'';}
+function childOptions(sel){return '<option value="">未指定</option>'+
+  (db.children||[]).map(c=>'<option value="'+c.id+'"'+(c.id===sel?' selected':'')+'>'+esc(c.name)+'</option>').join('');}
 function recordMoment(k){
   const tr=T();if(!tr){toast('先におでかけを作成してね');return;}
   if(!Array.isArray(tr.logs))tr.logs=[];
   const memo=$('lgMemo').value.trim();
-  const log={id:'l'+Date.now()+'_'+Math.floor(Math.random()*1000),k:k,ts:Date.now(),memo:memo};
+  const childId=$('lgChild')?$('lgChild').value:'';
+  const log={id:'l'+Date.now()+'_'+Math.floor(Math.random()*1000),k:k,ts:Date.now(),memo:memo,childId:childId};
   const fresh=lastGeo&&(Date.now()-lastGeoAt<120000);
   if(fresh){log.lat=lastGeo.lat;log.lng=lastGeo.lng;}
   tr.logs.push(log);
@@ -879,6 +901,8 @@ function renderLog(){
     $('lgsummary').innerHTML='';renderKids();return;}
   tripHeader('tn-log');
   if(!Array.isArray(tr.logs))tr.logs=[];
+  // 「だれの記録か」セレクタ（選択は維持）
+  if($('lgChild')){const cur=$('lgChild').value||'';$('lgChild').innerHTML=childOptions(cur);}
   const today=fdate(new Date());
   const cnt={};tr.logs.forEach(l=>{if(fdate(new Date(l.ts))===today)cnt[l.k]=(cnt[l.k]||0)+1;});
   $('lgsummary').innerHTML=MOMENTS.filter(m=>cnt[m.k]).map(m=>
@@ -890,24 +914,36 @@ function renderLog(){
     $('lglist').innerHTML='<div class="empty">まだ記録がありません。<br>おでかけ中にボタンを押すと、ここに時系列で残ります。</div>';
     renderKids();return;
   }
+  const hasKids=(db.children||[]).length>0;
   $('lglist').innerHTML=dates.map(d=>{
     const items=byDate[d].slice().sort((a,b)=>b.ts-a.ts).map(l=>{
       const m=MOMENT_MAP[l.k]||{e:'•',n:l.k};
       const nav=l.lat!=null?'<a class="navb" href="'+mapUrl(l.lat+','+l.lng)+'" target="_blank" rel="noopener">🧭</a>':'';
-      const sub=[l.memo?esc(l.memo):'',l.lat!=null?'📍記録あり':''].filter(Boolean).join(' ・ ');
-      return '<div class="li logi"><input type="time" class="ltedit" data-id="'+l.id+'" value="'+logTime(l.ts)+'" aria-label="時刻を変更">'+
-        '<div class="lm"><b>'+m.e+' '+m.n+'</b>'+(sub?'<small>'+sub+'</small>':'')+'</div>'+
-        nav+'<button class="xdel" data-id="'+l.id+'">✕</button></div>';
+      const csel=hasKids?'<select class="lchild" data-id="'+l.id+'">'+childOptions(l.childId||'')+'</select>':'';
+      return '<div class="logc"><div class="logc-top">'+
+        '<input type="time" class="ltedit" data-id="'+l.id+'" value="'+logTime(l.ts)+'" aria-label="時刻を変更">'+
+        '<span class="logc-label">'+m.e+' '+m.n+'</span>'+csel+nav+
+        '<button class="xdel" data-id="'+l.id+'">✕</button></div>'+
+        '<input class="lmemoedit" data-id="'+l.id+'" placeholder="メモ（あとから編集できます）" value="'+esc(l.memo||'')+'">'+
+        '</div>';
     }).join('');
     return '<div class="daysep">'+dayLabel(d)+'</div><div class="list">'+items+'</div>';
   }).join('');
-  // 時刻をあとから変更（押せなかった時用）
+  // 時刻をあとから変更（押せなかった時用）→ 再整列
   $('lglist').querySelectorAll('.ltedit').forEach(inp=>inp.onchange=()=>{
     const lg=tr.logs.find(x=>x.id===inp.dataset.id);if(!lg||!inp.value)return;
     const parts=inp.value.split(':'),h=+parts[0],mm=+parts[1];
     const d=new Date(lg.ts);d.setHours(h,mm,0,0);lg.ts=d.getTime();
     persist(false);renderLog();toast('🕐 時刻を変更しました');
   });
+  // メモをあとから編集
+  $('lglist').querySelectorAll('.lmemoedit').forEach(inp=>inp.onchange=()=>{
+    const lg=tr.logs.find(x=>x.id===inp.dataset.id);if(!lg)return;
+    lg.memo=inp.value.trim();persist(false);});
+  // だれの記録か（未指定＝なしもOK）
+  $('lglist').querySelectorAll('.lchild').forEach(sel=>sel.onchange=()=>{
+    const lg=tr.logs.find(x=>x.id===sel.dataset.id);if(!lg)return;
+    lg.childId=sel.value;persist(false);});
   $('lglist').querySelectorAll('.xdel').forEach(b=>b.onclick=()=>{
     tr.logs=tr.logs.filter(l=>l.id!==b.dataset.id);persist();renderLog();});
   renderKids();
@@ -929,7 +965,9 @@ function renderKids(){
     '<button class="xdel" data-id="'+c.id+'">✕</button></div>').join('')||
     '<div class="empty">まだ登録がありません（任意）</div>';
   list.querySelectorAll('.xdel').forEach(b=>b.onclick=()=>{
-    db.children=db.children.filter(c=>c.id!==b.dataset.id);persist();renderKids();});
+    db.children=db.children.filter(c=>c.id!==b.dataset.id);persist();renderKids();renderLog();});
+  // 「だれの記録か」セレクタもお子さん変更に追従
+  if($('lgChild')){const cur=$('lgChild').value||'';$('lgChild').innerHTML=childOptions(cur);}
 }
 $('kidAdd').onclick=()=>{
   const name=$('kidName').value.trim(),birth=$('kidBirth').value;
@@ -950,8 +988,8 @@ function renderRecap(){
   // 統合タイムライン：予定(schedule) と 実績(logs) を datetime で混ぜる
   const items=[];
   sortedEvents(tr).forEach(o=>items.push({dt:evtDate(o.e),kind:'plan',t:o.e.t,title:o.e.title,note:o.e.note}));
-  tr.logs.forEach(l=>{const m=MOMENT_MAP[l.k]||{e:'•',n:l.k};const d=new Date(l.ts);
-    items.push({dt:d,kind:'rec',t:pad(d.getHours())+':'+pad(d.getMinutes()),title:m.e+' '+m.n,note:l.memo});});
+  tr.logs.forEach(l=>{const m=MOMENT_MAP[l.k]||{e:'•',n:l.k};const d=new Date(l.ts);const cn=l.childId?childName(l.childId):'';
+    items.push({dt:d,kind:'rec',t:pad(d.getHours())+':'+pad(d.getMinutes()),title:m.e+' '+m.n+(cn?'（'+cn+'）':''),note:l.memo});});
   items.sort((a,b)=>a.dt-b.dt);
   // 集計
   const cnt={};tr.logs.forEach(l=>cnt[l.k]=(cnt[l.k]||0)+1);
@@ -1040,8 +1078,8 @@ function buildBooklet(tr){
   const chips=MOMENTS.filter(m=>cnt[m.k]).map(m=>'<span class="bk-chip">'+m.e+' '+m.n+' ×'+cnt[m.k]+'</span>').join('');
   const items=[];
   sortedEvents(tr).forEach(o=>items.push({t:o.e.t,x:esc(o.e.title),rec:false}));
-  (tr.logs||[]).forEach(l=>{const d=new Date(l.ts),m=MOMENT_MAP[l.k]||{e:'•',n:l.k};
-    items.push({t:pad(d.getHours())+':'+pad(d.getMinutes()),x:m.e+' '+m.n+(l.memo?'（'+esc(l.memo)+'）':''),rec:true});});
+  (tr.logs||[]).forEach(l=>{const d=new Date(l.ts),m=MOMENT_MAP[l.k]||{e:'•',n:l.k};const cn=l.childId?esc(childName(l.childId)):'';
+    items.push({t:pad(d.getHours())+':'+pad(d.getMinutes()),x:m.e+' '+m.n+(cn?'（'+cn+'）':'')+(l.memo?'（'+esc(l.memo)+'）':''),rec:true});});
   items.sort((a,b)=>a.t.localeCompare(b.t));
   if(chips||items.length)
     h+='<div class="bk-page">'+sec('この日の記録')+
@@ -1068,7 +1106,8 @@ function tripFactsText(tr){
   const moments=MOMENTS.filter(m=>cnt[m.k]).map(m=>m.n+'×'+cnt[m.k]).join('、')||'なし';
   const items=[];
   sortedEvents(tr).forEach(o=>items.push({t:o.e.t,k:'予定',title:o.e.title,note:o.e.note||''}));
-  (tr.logs||[]).forEach(l=>{const d=new Date(l.ts);items.push({t:pad(d.getHours())+':'+pad(d.getMinutes()),k:'記録',title:(MOMENT_MAP[l.k]||{n:l.k}).n,note:l.memo||''});});
+  (tr.logs||[]).forEach(l=>{const d=new Date(l.ts);const cn=l.childId?childName(l.childId):'';
+    items.push({t:pad(d.getHours())+':'+pad(d.getMinutes()),k:'記録',title:(MOMENT_MAP[l.k]||{n:l.k}).n+(cn?'（'+cn+'）':''),note:l.memo||''});});
   items.sort((a,b)=>a.t.localeCompare(b.t));
   const tl=items.slice(0,40).map(it=>it.t+' ['+it.k+'] '+it.title+(it.note?'（'+it.note+'）':'')).join('\n');
   return '【おでかけ】'+tr.name+'（'+(tr.pref||'')+(tr.dest?'・'+tr.dest:'')+'）'+tr.start+'〜'+tr.end+'\n【できごと】'+moments+'\n【予定と記録】\n'+(tl||'（記録なし）');

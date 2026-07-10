@@ -35,7 +35,7 @@ await page.fill('#lgMemo', 'おなかすいた');
 await page.click('.mbtn[data-k="fuss"]'); await page.waitForTimeout(120); // ← memoはこの記録へ
 await page.click('.mbtn[data-k="milk"]'); await page.waitForTimeout(120); // ← memoなし
 const summary = await page.textContent('#lgsummary');
-const rows = (await page.$$('#lglist .li')).length;
+const rows = (await page.$$('#lglist .logc')).length;
 check('QTC-LOG-01b', /😭/.test(summary) && /🍼/.test(summary) && rows === 2, 'summary=' + summary.replace(/\s+/g, ''));
 
 const stored = await page.evaluate(() => {
@@ -72,11 +72,27 @@ check('QTC-CHILD-01', /\d+歳\d+ヶ月/.test(kid), kid.replace(/\s+/g, ' ').trim
 // QTC-DATA-01: リロード保持
 await page.reload(); await page.waitForTimeout(300);
 await page.click('.tab[data-page="log"]'); await page.waitForTimeout(150);
-check('QTC-DATA-01', (await page.$$('#lglist .li')).length === 2, 'reload後も2件');
+check('QTC-DATA-01', (await page.$$('#lglist .logc')).length === 2, 'reload後も2件');
 
 // QTC-REG-01: 既存スケジュール回帰
 await page.click('.tab[data-page="sched"]'); await page.waitForTimeout(150);
 check('QTC-REG-01', (await page.$$('#evlist .li')).length > 0, '既存予定が描画');
+
+// QTC-WHO-01: だれの記録か（任意）を付けて記録できる
+await page.click('.tab[data-page="log"]'); await page.waitForTimeout(150);
+await page.selectOption('#lgChild', { label: '長女' });
+await page.click('.mbtn[data-k="hold"]'); await page.waitForTimeout(150);
+const who = await page.evaluate(() => { const d = JSON.parse(localStorage.getItem('odekake_v1')); const t = d.trips.find(x => x.id === d.active); const l = t.logs.find(x => x.k === 'hold'); return (d.children.find(c => c.id === l.childId) || {}).name; });
+check('QTC-WHO-01', who === '長女', 'だれの記録か=' + who);
+// QTC-MEMO-01: メモをあとから編集できる（先頭=最新=hold）
+await page.locator('.lmemoedit').first().fill('抱っこで即寝');
+await page.locator('.lmemoedit').first().dispatchEvent('change'); await page.waitForTimeout(120);
+const memoEdited = await page.evaluate(() => { const d = JSON.parse(localStorage.getItem('odekake_v1')); const t = d.trips.find(x => x.id === d.active); return t.logs.find(x => x.k === 'hold').memo; });
+check('QTC-MEMO-01', memoEdited === '抱っこで即寝', 'メモ後編集=' + memoEdited);
+// QTC-WHO-02: 「未指定（なし）」に戻せる
+await page.locator('.lchild').first().selectOption(''); await page.waitForTimeout(120);
+const cleared = await page.evaluate(() => { const d = JSON.parse(localStorage.getItem('odekake_v1')); const t = d.trips.find(x => x.id === d.active); return t.logs.find(x => x.k === 'hold').childId; });
+check('QTC-WHO-02', cleared === '', '未指定に戻せる (childId="' + cleared + '")');
 
 check('QTC-NO-ERRORS', errors.length === 0, errors.join(' | ') || 'コンソールエラー無し');
 
