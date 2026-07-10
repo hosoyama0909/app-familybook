@@ -53,6 +53,7 @@
 | SWR-STORY-05 | 中継Worker URL(`storyUrl`)を設定・保存でき、未設定時は設定導線を出す | SYR-N8 |
 | SWR-STORY-06 | 通信失敗・未設定・オフライン時はトースト通知し、既存物語と他機能を保持する | SYR-N9 |
 | SWR-WORKER-01 | Worker は GEMINI_API_KEY を secret 保持し、CORS付きで Gemini を代理呼び出しする | SYR-N8 |
+| SWR-AWARD-01 | ふりかえりに、きろくから集計した「あるある大賞」（MVP・大忙し時間帯・件数）を表示する（AI不要） | SYR-16 |
 
 ## 横断要求
 

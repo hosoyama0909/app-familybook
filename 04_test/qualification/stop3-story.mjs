@@ -41,8 +41,13 @@ await page.click('.mbtn[data-k="spot"]'); await page.waitForTimeout(100);
 await page.evaluate((u) => { const d = JSON.parse(localStorage.getItem('odekake_v1')); d.storyUrl = u; localStorage.setItem('odekake_v1', JSON.stringify(d)); }, MOCK);
 await page.reload(); await page.waitForTimeout(300);
 
-// QTC-STORY-01: 生成ボタン→物語が表示される
+// QTC-AWARD-01: あるある大賞（AI不要）がきろくから表示される
 await page.click('.tab[data-page="recap"]'); await page.waitForTimeout(200);
+const award = await page.textContent('.awardcard').catch(() => '');
+check('QTC-AWARD-01', /大賞/.test(award) && /神スポット/.test(award), 'あるある大賞表示');
+
+// QTC-STORY-01: 生成ボタン→物語が表示される
+await page.waitForTimeout(50);
 await page.click('#genStory'); await page.waitForTimeout(400);
 const shown = await page.textContent('.storytext').catch(() => '');
 check('QTC-STORY-01', /長女/.test(shown), '物語表示');

@@ -256,6 +256,16 @@
   .setrow input:focus{outline:2px solid var(--green2)}
   .setrow button{flex:none;background:var(--green);color:var(--ongreen);border:none;border-radius:10px;padding:0 14px;font-weight:800;cursor:pointer}
   .setlink{font-size:11px;color:var(--sky);text-decoration:underline;background:none;border:none;cursor:pointer;padding:0}
+
+  /* ===== あるある大賞 ===== */
+  .awardcard{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px 16px;
+    box-shadow:var(--shadow);margin-bottom:14px}
+  .awardcard .sh{font-family:var(--serif);font-size:16px;font-weight:700;margin-bottom:8px}
+  .awrow{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line)}
+  .awrow:last-child{border-bottom:none}
+  .awt{font-size:12.5px;font-weight:800;color:var(--sub);flex:none;min-width:104px}
+  .awv{font-size:14px;font-weight:700}
+  .awv b{font-family:var(--serif);color:var(--green)}
 </style>
 </head>
 <body>
@@ -843,8 +853,26 @@ function renderRecap(){
     '<div class="tc"><b>'+esc(it.title)+'</b>'+(it.note?'<small>'+esc(it.note)+'</small>':'')+'</div>'+
     '<span class="tag2 '+(it.kind==='rec'?'rec':'plan')+'">'+(it.kind==='rec'?'記録':'予定')+'</span></div>').join('')+'</div>')
     : '<div class="empty">予定やきろくがここに時系列で並びます。<br>スケジュールを入れ、当日きろくを押してみよう。</div>';
-  body.innerHTML=head+tl;
+  body.innerHTML=head+tripAwards(tr)+tl;
   renderStory();
+}
+
+/* ===== あるある大賞（きろくから面白統計・AI不要） ===== */
+const AWARD_TITLE={fuss:'グズり職人',hold:'抱っこ大臣',milk:'ごくごく王',diaper:'おむつ番長',nap:'爆睡マスター',spot:'神スポット発見隊'};
+function tripAwards(tr){
+  const logs=tr.logs||[];if(!logs.length)return '';
+  const cnt={};logs.forEach(l=>cnt[l.k]=(cnt[l.k]||0)+1);
+  let mvpK=null,mvpN=0;Object.keys(cnt).forEach(k=>{if(cnt[k]>mvpN){mvpN=cnt[k];mvpK=k;}});
+  const hours={};logs.forEach(l=>{const h=new Date(l.ts).getHours();hours[h]=(hours[h]||0)+1;});
+  let bh=null,bn=0;Object.keys(hours).forEach(h=>{if(hours[h]>bn){bn=hours[h];bh=+h;}});
+  const rows=[];
+  if(mvpK){const m=MOMENT_MAP[mvpK];rows.push(['🏆 今回のMVP',m.e+' <b>'+(AWARD_TITLE[mvpK]||m.n)+'</b>（'+mvpN+'回）']);}
+  if(bh!=null&&bn>1)rows.push(['⏰ 大忙しタイム','<b>'+bh+'時台</b>（'+bn+'件）']);
+  if(cnt.fuss)rows.push(['😭 グズり',''+cnt.fuss+'回 のりきった！']);
+  if(cnt.spot)rows.push(['⭐ 神スポット',''+cnt.spot+'カ所 発見']);
+  if((tr.photos||[]).length)rows.push(['📸 写真',''+tr.photos.length+'枚']);
+  return '<div class="awardcard"><div class="sh">🏆 あるある大賞</div>'+
+    rows.map(r=>'<div class="awrow"><span class="awt">'+r[0]+'</span><span class="awv">'+r[1]+'</span></div>').join('')+'</div>';
 }
 
 /* ===== AI物語（Cloudflare Worker + Gemini） ===== */
