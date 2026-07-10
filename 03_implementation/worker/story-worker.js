@@ -63,7 +63,8 @@ export default {
 
     let payload;
     try { payload = await request.json(); } catch { return json({ error: '不正なJSON' }, 400, origin); }
-    const prompt = buildPrompt(payload);
+    // アプリ側で組んだ prompt を優先（以後、物語/手紙など新機能でWorker変更不要）。無ければ従来通り組み立て。
+    const prompt = (typeof payload.prompt === 'string' && payload.prompt.trim()) ? payload.prompt : buildPrompt(payload);
 
     // 既定モデル → フォールバックの順に試す。503/500は同モデルで1回再試行、他は次モデルへ。
     const models = [env.GEMINI_MODEL || 'gemini-flash-lite-latest', ...FALLBACK].filter((v, i, a) => v && a.indexOf(v) === i);

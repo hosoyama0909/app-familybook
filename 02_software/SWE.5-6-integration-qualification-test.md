@@ -45,6 +45,17 @@ Worker/Gemini本体は外部依存のため、**Worker応答をモック**して
 | QTC-STORY-04 | 生成が502失敗 | クラッシュせず既存物語を保持 | SWR-STORY-06 / SYR-N9 | ✅ Pass |
 | QTC-REG-03 | スケジュール回帰 | 既存予定が描画 | SWR-CORE-01 | ✅ Pass |
 
+### 子どもへの手紙 ＋ Stop 4（学習・提案）— `04_test/qualification/stop4-letter-learn.mjs`
+
+| ID | シナリオ | 期待結果 | 割当(SWR/SYR) | 結果 |
+|----|----------|----------|---------------|------|
+| QTC-LETTER-01 | お子さん登録後に手紙生成 | 手紙が表示され、手紙用プロンプトが送信される | SWR-LETTER-01,02 | ✅ Pass |
+| QTC-LETTER-02 | 手紙生成後リロード | `trip.letters` が保持される | SWR-LETTER-01 | ✅ Pass |
+| QTC-HP-01 | きろく後にふりかえり | 親HP（がんばりメーター）表示 | SWR-HP-01 | ✅ Pass |
+| QTC-LEARN-01 | 記録3件以上でホーム表示 | 家族のまなびカード表示 | SWR-LEARN-01 | ✅ Pass |
+| QTC-OPEN-01 | ちず表示 | 新規開拓の提案文表示 | SWR-OPEN-01 | ✅ Pass |
+| QTC-REG-04 | 物語（既存AI）回帰 | 物語も生成できる（Worker汎用化後） | SWR-STORY-01, SWR-WORKER-02 | ✅ Pass |
+
 > 実データでの Worker↔Gemini 疎通は、デプロイ後に `worker/README.md` の curl で手動確認する。
 
 ## 実行記録

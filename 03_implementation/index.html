@@ -266,6 +266,32 @@
   .awt{font-size:12.5px;font-weight:800;color:var(--sub);flex:none;min-width:104px}
   .awv{font-size:14px;font-weight:700}
   .awv b{font-family:var(--serif);color:var(--green)}
+
+  /* ===== 手紙 ===== */
+  .lettertext{font-family:var(--serif);font-size:14.5px;line-height:2;color:var(--ink);white-space:pre-wrap;
+    background:linear-gradient(var(--card),var(--bg2));border:1px solid var(--line);border-radius:12px;padding:16px 16px;margin:4px 0 10px}
+  .letterbtn{background:var(--card);color:var(--accent);border:1.5px solid var(--accent);border-radius:12px;
+    padding:11px 14px;font-weight:800;font-size:13.5px;cursor:pointer;width:100%}
+  .letterbtn:disabled{opacity:.6}
+
+  /* ===== 親HP がんばりメーター ===== */
+  .hpcard{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 16px;box-shadow:var(--shadow);margin-bottom:14px}
+  .hpcard .sh{font-family:var(--serif);font-size:15px;font-weight:700;margin-bottom:9px}
+  .hpbar{height:12px;border-radius:8px;background:var(--bg2);overflow:hidden}
+  .hpbar>i{display:block;height:100%;background:linear-gradient(90deg,var(--gold),var(--accent));transition:.5s}
+  .hpmsg{font-size:13px;color:var(--sub);margin-top:8px;font-weight:700}
+
+  /* ===== 家族のまなび（ホーム）＆開拓提案 ===== */
+  .learncard{background:linear-gradient(135deg,var(--green),var(--green2));color:#fff;border-radius:18px;
+    padding:15px 17px;box-shadow:var(--shadow);margin-bottom:16px}
+  .learncard .sh{font-size:13px;font-weight:800;letter-spacing:1px;opacity:.9;margin-bottom:9px}
+  .lrow{display:flex;align-items:baseline;gap:9px;padding:6px 0;font-size:13.5px;border-top:1px solid rgba(255,255,255,.15)}
+  .lrow:first-of-type{border-top:none}
+  .lrow .lk{opacity:.85;flex:none;min-width:118px;font-weight:700;font-size:12px}
+  .lrow b{font-family:var(--serif);font-size:16px}
+  .opensug{background:var(--card);border:1px dashed var(--green2);border-radius:14px;padding:12px 14px;
+    font-size:13px;color:var(--ink);margin-bottom:14px;line-height:1.7}
+  .opensug b{color:var(--green)}
 </style>
 </head>
 <body>
@@ -298,6 +324,8 @@
     <div><div class="cl">NEXT ⏱</div><div class="cnext" id="cnext">—</div></div>
     <div class="ctime"><b id="ctime">--:--</b><span id="cunit">まで</span></div>
   </div>
+
+  <div id="homeInsights"></div>
 
   <div class="editorial">TRIPS</div>
   <div class="sec-title">🧳 おでかけ一覧</div>
@@ -591,7 +619,7 @@ if(!db||!Array.isArray(db.trips)){
 if(!db.seq)db.seq=db.trips.length+1;
 if(!Array.isArray(db.children))db.children=[];
 if(typeof db.storyUrl!=='string')db.storyUrl='';
-db.trips.forEach(t=>{if(!Array.isArray(t.logs))t.logs=[];if(typeof t.pref!=='string')t.pref='';});
+db.trips.forEach(t=>{if(!Array.isArray(t.logs))t.logs=[];if(typeof t.pref!=='string')t.pref='';if(!t.letters||typeof t.letters!=='object')t.letters={};});
 
 let tT;
 function persist(show){try{localStorage.setItem(KEY,JSON.stringify(db));if(show!==false)toast('💾 保存しました');}
@@ -680,6 +708,32 @@ function renderHome(){
     persist();renderAll();
   });
   $('editTrips').textContent=editMode?'✅ 編集おわり':'✏️ 編集（削除）モード';
+  renderHomeInsights();
+}
+
+/* ===== 家族のまなび（学習・提案）— Stop 4・AI不要 ===== */
+function learnInsights(){
+  const all=[];db.trips.forEach(t=>(t.logs||[]).forEach(l=>all.push(l)));
+  if(all.length<3)return null;
+  const fussHours={};all.filter(l=>l.k==='fuss').forEach(l=>{const h=new Date(l.ts).getHours();fussHours[h]=(fussHours[h]||0)+1;});
+  let fh=null,fn=0;Object.keys(fussHours).forEach(h=>{if(fussHours[h]>fn){fn=fussHours[h];fh=+h;}});
+  const gaps=[];db.trips.forEach(t=>{const ls=(t.logs||[]).slice().sort((a,b)=>a.ts-b.ts);if(!ls.length)return;
+    const ff=ls.find(l=>l.k==='fuss');if(ff)gaps.push((ff.ts-ls[0].ts)/60000);});
+  const avgGap=gaps.length?Math.round(gaps.reduce((a,b)=>a+b,0)/gaps.length):null;
+  return {logCount:all.length,tripCount:db.trips.length,fussHour:fh,fussHourN:fn,avgGapMin:avgGap};
+}
+function minLabel(m){const h=Math.floor(m/60),mm=m%60;return (h?h+'時間':'')+(mm?mm+'分':'')||'0分';}
+function renderHomeInsights(){
+  const slot=$('homeInsights');if(!slot)return;
+  const ins=learnInsights();
+  if(!ins){slot.innerHTML='';return;}
+  const rows=[];
+  if(ins.fussHour!=null&&ins.fussHourN>=2)rows.push(['😭 グズりが多い','<b>'+ins.fussHour+'時台</b>']);
+  if(ins.avgGapMin!=null)rows.push(['⏳ 外出から','約<b>'+minLabel(ins.avgGapMin)+'</b>でグズりやすい']);
+  if(ins.avgGapMin!=null&&ins.avgGapMin>25)rows.push(['☕ 休憩の目安','外出から約<b>'+minLabel(Math.max(15,Math.round((ins.avgGapMin-15)/15)*15))+'</b>でひと休みを']);
+  if(!rows.length){slot.innerHTML='';return;}
+  slot.innerHTML='<div class="learncard"><div class="sh">🧠 家族のまなび（きろく'+ins.logCount+'件から）</div>'+
+    rows.map(r=>'<div class="lrow"><span class="lk">'+r[0]+'</span><span>'+r[1]+'</span></div>').join('')+'</div>';
 }
 $('ntAdd').onclick=()=>{
   const name=$('ntName').value.trim(),type=typeSel.value,dest=$('ntDest').value.trim(),pref=$('ntPref').value;
@@ -853,7 +907,7 @@ function renderRecap(){
     '<div class="tc"><b>'+esc(it.title)+'</b>'+(it.note?'<small>'+esc(it.note)+'</small>':'')+'</div>'+
     '<span class="tag2 '+(it.kind==='rec'?'rec':'plan')+'">'+(it.kind==='rec'?'記録':'予定')+'</span></div>').join('')+'</div>')
     : '<div class="empty">予定やきろくがここに時系列で並びます。<br>スケジュールを入れ、当日きろくを押してみよう。</div>';
-  body.innerHTML=head+tripAwards(tr)+tl;
+  body.innerHTML=head+tripHP(tr)+tripAwards(tr)+tl;
   renderStory();
 }
 
@@ -875,8 +929,40 @@ function tripAwards(tr){
     rows.map(r=>'<div class="awrow"><span class="awt">'+r[0]+'</span><span class="awv">'+r[1]+'</span></div>').join('')+'</div>';
 }
 
-/* ===== AI物語（Cloudflare Worker + Gemini） ===== */
-let storyLoading=false, storySetup=false;
+/* ===== 親HP（がんばりメーター）— Stop 4・AI不要 ===== */
+function tripHP(tr){
+  const logs=tr.logs||[];if(!logs.length)return '';
+  const cnt={};logs.forEach(l=>cnt[l.k]=(cnt[l.k]||0)+1);
+  const effort=(cnt.fuss||0)*3+(cnt.hold||0)*2+(cnt.diaper||0)+(cnt.milk||0)+(cnt.nap||0)*0.5;
+  const ganbari=Math.min(100,Math.round(effort*9));
+  let msg='おだやかな一日 🌿';
+  if((cnt.hold||0)>=3)msg='抱っこ地獄、おつかれさま 🤱';
+  else if((cnt.fuss||0)>=3)msg='グズり多め、よくのりきった 😭';
+  else if((cnt.spot||0)>=1&&!(cnt.fuss))msg='笑顔いっぱいの日 ⭐';
+  return '<div class="hpcard"><div class="sh">💪 親のがんばりメーター</div>'+
+    '<div class="hpbar"><i style="width:'+ganbari+'%"></i></div>'+
+    '<div class="hpmsg">'+msg+'（がんばり度 '+ganbari+'）</div></div>';
+}
+
+/* ===== AI物語・手紙（Cloudflare Worker + Gemini） ===== */
+let storyLoading=false, storySetup=false, letterLoading=null;
+function tripFactsText(tr){
+  const cnt={};(tr.logs||[]).forEach(l=>cnt[l.k]=(cnt[l.k]||0)+1);
+  const moments=MOMENTS.filter(m=>cnt[m.k]).map(m=>m.n+'×'+cnt[m.k]).join('、')||'なし';
+  const items=[];
+  sortedEvents(tr).forEach(o=>items.push({t:o.e.t,k:'予定',title:o.e.title,note:o.e.note||''}));
+  (tr.logs||[]).forEach(l=>{const d=new Date(l.ts);items.push({t:pad(d.getHours())+':'+pad(d.getMinutes()),k:'記録',title:(MOMENT_MAP[l.k]||{n:l.k}).n,note:l.memo||''});});
+  items.sort((a,b)=>a.t.localeCompare(b.t));
+  const tl=items.slice(0,40).map(it=>it.t+' ['+it.k+'] '+it.title+(it.note?'（'+it.note+'）':'')).join('\n');
+  return '【おでかけ】'+tr.name+'（'+(tr.pref||'')+(tr.dest?'・'+tr.dest:'')+'）'+tr.start+'〜'+tr.end+'\n【できごと】'+moments+'\n【予定と記録】\n'+(tl||'（記録なし）');
+}
+function buildStoryPrompt(tr){
+  return 'あなたは家族の思い出を綴る、あたたかく少しユーモアのある書き手です。\n以下の記録から、親の目線で200〜320字の日本語の物語文（日記）を、地の文で書いてください。絵文字や見出しは不要。\n\n'+tripFactsText(tr);
+}
+function buildLetterPrompt(tr,child){
+  const age=child.birth?ageStr(child.birth):'';
+  return 'あなたは親に代わって、子どもへの手紙を書く代筆者です。\n以下のおでかけの記録をもとに、'+child.name+'（当時'+age+'）へ宛てた、10年後に読んでも心が温まる手紙を250〜380字で書いてください。\n・「'+child.name+'へ」で始め、その日の出来事と親の気持ちを織り込む\n・やわらかな手書き風の語り口。絵文字や見出しは使わない\n\n'+tripFactsText(tr);
+}
 function buildStoryPayload(tr){
   const cnt={};(tr.logs||[]).forEach(l=>cnt[l.k]=(cnt[l.k]||0)+1);
   const timeline=[];
@@ -919,12 +1005,41 @@ function renderStory(){
        '<button id="saveStoryUrl">保存</button></div>';
   }
   h+='</div>';
+  // ✍️ 子どもへの手紙（お子さんごと・要Worker）
+  if(hasUrl){
+    (db.children||[]).forEach(c=>{
+      const lt=(tr.letters||{})[c.id];
+      h+='<div class="storycard"><div class="sh">✍️ '+esc(c.name)+'への手紙</div>';
+      if(lt&&lt.text)h+='<div class="storymeta">🕊 '+new Date(lt.ts).toLocaleString('ja-JP')+' 生成</div><div class="lettertext">'+esc(lt.text)+'</div>';
+      if(letterLoading===c.id)h+='<button class="letterbtn" disabled>✍️ 手紙をしたためています…</button>';
+      else h+='<button class="letterbtn" data-letter="'+c.id+'">'+(lt?'✍️ 書き直す':'✍️ 手紙を書く')+'</button>';
+      h+='</div>';
+    });
+    if(!(db.children||[]).length)
+      h+='<div class="storycard"><div class="sh">✍️ 子どもへの手紙</div><div class="consent">「きろく」タブでお子さんを登録すると、その子への手紙を書けます。</div></div>';
+  }
   slot.innerHTML=h;
   const g=$('genStory');if(g)g.onclick=generateStory;
   const ss=$('showSetup');if(ss)ss.onclick=()=>{storySetup=!storySetup;renderStory();};
   const sv=$('saveStoryUrl');if(sv)sv.onclick=()=>{
     db.storyUrl=($('storyUrlIn').value||'').trim();storySetup=false;persist(false);
     renderStory();toast(db.storyUrl?'✅ URLを保存しました':'URLを空にしました');};
+  slot.querySelectorAll('[data-letter]').forEach(b=>b.onclick=()=>generateLetter(b.dataset.letter));
+}
+async function generateLetter(childId){
+  const tr=T();if(!tr)return;
+  const child=(db.children||[]).find(c=>c.id===childId);if(!child)return;
+  if(!db.storyUrl){toast('先にWorker URLを設定してね');storySetup=true;renderStory();return;}
+  if(!tr.letters||typeof tr.letters!=='object')tr.letters={};
+  letterLoading=childId;renderStory();
+  try{
+    const r=await fetch(db.storyUrl,{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({prompt:buildLetterPrompt(tr,child)})});
+    let data={};try{data=await r.json();}catch(e){}
+    if(!r.ok||!data.story)throw new Error(data.error||('生成に失敗（'+r.status+'）'));
+    tr.letters[childId]={text:data.story,ts:Date.now()};persist(false);toast('✍️ 手紙ができました');
+  }catch(e){toast('⚠️ '+(e.message||'生成に失敗しました'));}
+  finally{letterLoading=null;renderStory();}
 }
 async function generateStory(){
   const tr=T();if(!tr)return;
@@ -932,7 +1047,7 @@ async function generateStory(){
   storyLoading=true;renderStory();
   try{
     const r=await fetch(db.storyUrl,{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify(buildStoryPayload(tr))});
+      body:JSON.stringify(Object.assign({prompt:buildStoryPrompt(tr)},buildStoryPayload(tr)))});
     let data={};try{data=await r.json();}catch(e){}
     if(!r.ok||!data.story)throw new Error(data.error||('生成に失敗（'+r.status+'）'));
     tr.story={text:data.story,ts:Date.now()};persist(false);toast('📖 物語ができました');
@@ -968,8 +1083,19 @@ function renderAtlas(){
         (n?'<span class="cnt">'+n+'</span>':'')+'</button>';}).join('');
     return '<div class="region"><h4>'+r.n+'<em>'+done+'/'+r.p.length+'</em></h4><div class="prefs">'+chips+'</div></div>';
   }).join('');
-  $('atlasbody').innerHTML=top+regionsHtml+'<div id="capsuleslot"></div>';
+  $('atlasbody').innerHTML=top+openingSuggestion(counts)+regionsHtml+'<div id="capsuleslot"></div>';
   $('atlasbody').querySelectorAll('.pchip').forEach(b=>b.onclick=()=>showCapsule(b.dataset.pref));
+}
+/* 新規開拓のおすすめ — Stop 4・AI不要 */
+function openingSuggestion(counts){
+  if(!Object.keys(counts).length)return '';
+  const rv=REGIONS.map(r=>({n:r.n,v:r.p.filter(p=>counts[p]).length}));
+  const most=rv.slice().sort((a,b)=>b.v-a.v)[0];
+  if(!most||!most.v)return '';
+  const zero=rv.filter(r=>r.v===0);
+  let s='<b>'+most.n+'</b>によく行ってますね。';
+  s+=zero.length?'まだ行ってない<b>'+zero[0].n+'</b>方面はどうですか？':'次はまだ少ない地方に足をのばしても◎';
+  return '<div class="opensug">🧭 '+s+'</div>';
 }
 function showCapsule(pref){
   const trips=db.trips.filter(t=>t.pref===pref).sort((a,b)=>a.start.localeCompare(b.start));

@@ -48,8 +48,9 @@
 | ChildRegistry | お子さん登録と年齢算出 | `renderKids()`, `ageStr(birth)`, `#kidAdd` | SWR-CHILD-01,02,03 |
 | RecordView（Stop2） | 予定+実績の統合ふりかえり描画 | `renderRecap()` | SWR-REC-01,02,03 |
 | AtlasView（Stop2） | 都道府県の集計・塗り分け・タイムカプセル | `renderAtlas()`, `prefCounts()`, `showCapsule(pref)`, `REGIONS/PREFS` | SWR-PREF-01〜04 |
-| StoryService（Stop3） | 物語生成の要求組立・送信・保存・描画 | `renderStory()`, `buildStoryPayload(tr)`, `generateStory()`, `db.storyUrl` | SWR-STORY-01〜06 |
-| StoryWorker（Stop3・別デプロイ） | キー秘匿・プロンプト整形・Gemini代理呼び出し | `worker/story-worker.js`（`buildPrompt`, CORS） | SWR-WORKER-01 / SYR-N8 |
+| StoryService（Stop3/4） | 物語・手紙の要求組立・送信・保存・描画 | `renderStory()`, `buildStoryPrompt()`, `buildLetterPrompt()`, `tripFactsText()`, `generateStory()`, `generateLetter()`, `db.storyUrl` | SWR-STORY-*, SWR-LETTER-* |
+| StoryWorker（別デプロイ・汎用リレー） | キー秘匿・Gemini代理。payload.prompt優先＋モデル自動フォールバック | `worker/story-worker.js` | SWR-WORKER-01,02 / SYR-N8 |
+| InsightsEngine（Stop4・AI不要） | 記録からの集計・学習・提案 | `tripHP()`, `learnInsights()`, `renderHomeInsights()`, `openingSuggestion()` | SWR-HP-01, SWR-LEARN-01, SWR-OPEN-01 |
 | Router | 画面遷移。recap/atlas は表示時に再集約 | `go(id)`（recap/atlasで再render） | SYR-N4, SWR-REC/PREF |
 | TripManager 他 View | 既存機能（回帰対象） | `renderHome/Sched/...` | SWR-CORE-01 |
 
