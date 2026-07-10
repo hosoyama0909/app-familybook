@@ -57,8 +57,19 @@ curl -X POST https://odekake-story.<あなた>.workers.dev \
 `{"story":"..."}` が返れば成功。
 
 ## モデル/コスト
-- 既定モデル: `gemini-2.0-flash`（無料枠）。`wrangler.toml` の `GEMINI_MODEL` で変更可。
+- **既定モデル: `gemini-flash-lite-latest`**（無料枠で安定動作・実機検証済み）。`GEMINI_MODEL` 変数で変更可。
+- 混雑(503)や失敗時は Worker が自動で `gemini-3.1-flash-lite` → `gemini-flash-latest` → `gemini-2.0-flash-001` へフォールバックし、503は1回再試行する。
 - Cloudflare Workers も無料枠（1日10万リクエスト）で十分。
+
+### 2026-07 時点のモデル検証メモ
+| モデル | 結果 |
+|--------|------|
+| `gemini-flash-lite-latest` | ✅ 無料枠で動作（採用） |
+| `gemini-flash-latest` | 動くが 503（混雑）が出やすい |
+| `gemini-2.0-flash` | 無料枠 `limit:0`（使用不可） |
+| `gemini-2.5-flash` | 新規ユーザー提供終了（404） |
+
+> 使えるモデル一覧は `GET https://generativelanguage.googleapis.com/v1beta/models?key=KEY` で確認できる。
 
 ## トラブル
 | 症状 | 対処 |

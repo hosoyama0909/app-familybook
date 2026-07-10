@@ -2,6 +2,16 @@
 
 構成管理（SUP.8）のリリース記録。各 Stop 完了時に追記し、Git タグを打つ。
 
+## [v0.3.2 - stop3] 2026-07-09 — AI物語 稼働確定（モデル決定）＋ Worker堅牢化
+### Changed
+- Worker既定モデルを **`gemini-flash-lite-latest`** に決定（無料枠で安定動作を実機検証）。
+- Worker に自動フォールバック（flash-lite → 3.1-flash-lite → flash-latest → 2.0-flash-001）と503再試行を追加。
+- GET は Gemini を呼ばないヘルスチェックに変更（無駄な無料枠消費を防止）。
+### Verified
+- Cloudflare Worker デプロイ → アプリ「物語を作る」で実際の物語生成を確認（SWR-STORY-01〜06 / SWR-WORKER-01 実機OK）。
+### Notes
+- モデル選定の経緯: 2.0-flash=無料枠0、2.5-flash=提供終了、flash-latest=503頻発 → flash-lite-latest 採用（`worker/README.md`）。
+
 ## [v0.3.1 - stop3] 2026-07-09 — あるある大賞 ＋ 配信をブランチ方式へ
 ### Added
 - 🏆 あるある大賞：ふりかえりで、きろくから MVP・大忙し時間帯・件数を集計表示（AI不要・オフライン動作）（SWR-AWARD-01, CR #10）

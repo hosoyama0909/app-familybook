@@ -8,7 +8,7 @@ compatibility_date = "2024-11-01"
 # 例: "https://hosoyama0909.github.io"  ・ 開発中は "*" でも可
 [vars]
 ALLOW_ORIGIN = "*"
-GEMINI_MODEL = "gemini-2.0-flash"
+GEMINI_MODEL = "gemini-flash-lite-latest"
 
 # 秘密鍵はここには書かない。以下のコマンドで登録する:
 #   npx wrangler secret put GEMINI_API_KEY
