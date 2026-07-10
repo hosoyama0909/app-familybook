@@ -54,6 +54,7 @@ Worker/Gemini本体は外部依存のため、**Worker応答をモック**して
 | QTC-HP-01 | きろく後にふりかえり | 親HP（がんばりメーター）表示 | SWR-HP-01 | ✅ Pass |
 | QTC-LEARN-01 | 記録3件以上でホーム表示 | 家族のまなびカード表示 | SWR-LEARN-01 | ✅ Pass |
 | QTC-OPEN-01 | ちず表示 | 新規開拓の提案文表示 | SWR-OPEN-01 | ✅ Pass |
+| QTC-BOOK-01 | 冊子ボタン押下 | 冊子DOM（表紙等）生成＆window.print呼出 | SWR-BOOK-01 | ✅ Pass |
 | QTC-REG-04 | 物語（既存AI）回帰 | 物語も生成できる（Worker汎用化後） | SWR-STORY-01, SWR-WORKER-02 | ✅ Pass |
 
 > 実データでの Worker↔Gemini 疎通は、デプロイ後に `worker/README.md` の curl で手動確認する。

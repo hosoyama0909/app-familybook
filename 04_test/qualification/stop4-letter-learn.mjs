@@ -19,6 +19,7 @@ const check = (id, cond, detail) => { results.push({ id, pass: !!cond }); consol
 const browser = await chromium.launch({ executablePath: EXE, args: ['--no-sandbox'] });
 const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
 const page = await ctx.newPage();
+await page.addInitScript(() => { window.print = () => { window.__printed = true; }; });
 const jsErrors = [];
 page.on('pageerror', e => jsErrors.push(e.message));
 page.on('console', m => { if (m.type() === 'error' && !/Failed to load resource/.test(m.text())) jsErrors.push('CONSOLE:' + m.text()); });
@@ -59,6 +60,12 @@ check('QTC-LEARN-01', (await page.$$('.learncard')).length === 1, '家族のま�
 // QTC-OPEN-01: ちずに新規開拓提案
 await page.click('.tab[data-page="atlas"]'); await page.waitForTimeout(200);
 check('QTC-OPEN-01', (await page.$$('.opensug')).length === 1, '開拓提案表示');
+
+// QTC-BOOK-01: 冊子（PDF）が生成され印刷が呼ばれる
+await page.click('.tab[data-page="recap"]'); await page.waitForTimeout(150);
+await page.click('#makeBooklet'); await page.waitForTimeout(400);
+const book = await page.evaluate(() => { const r = document.getElementById('bookletRoot'); return { cover: !!r.querySelector('.bk-cover'), letter: /への手紙|へ$/.test(r.textContent) || /長女へ/.test(r.textContent), printed: !!window.__printed }; });
+check('QTC-BOOK-01', book.cover && book.printed, '冊子DOM生成＆print呼出');
 
 // QTC-REG-04: 物語（既存AI機能）に回帰なし
 await page.click('.tab[data-page="recap"]'); await page.waitForTimeout(150);
