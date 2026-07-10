@@ -62,6 +62,7 @@
   → Branch: `main` / Folder: `/ (root)` → Save
 - **入口**：リポジトリ直下の `index.html` が本体 `03_implementation/index.html` へ転送する。
   そのため **https://hosoyama0909.github.io/main/** でこのアプリが開く。
+  転送時に `?v=時刻` を自動付与するため、更新後に古い画面がキャッシュで残らない（本体HTMLは常に最新を取得）。
 - **本体URL（直接）**：`https://hosoyama0909.github.io/main/03_implementation/index.html`
 - 他のアプリを足すときは `別フォルダ/` に置けば `…/main/別フォルダ/` で配信される。
 
