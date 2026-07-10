@@ -189,6 +189,9 @@
     padding:6px 12px;border-radius:12px;font-variant-numeric:tabular-nums}
   .daysep{font-family:var(--serif);font-size:12.5px;font-weight:700;color:var(--sub);letter-spacing:1px;margin:16px 2px 7px}
   .logi .lt{color:var(--accent);min-width:42px}
+  .ltedit{flex:none;border:1px solid var(--line);border-radius:9px;background:var(--bg2);color:var(--accent);
+    font-weight:800;font-size:12.5px;padding:5px 6px;font-family:inherit;width:78px;font-variant-numeric:tabular-nums}
+  .ltedit:focus{outline:2px solid var(--green2)}
   .kidage{font-size:11.5px;color:var(--sub);font-weight:600}
 
   /* ===== ふりかえり ===== */
@@ -293,27 +296,55 @@
     font-size:13px;color:var(--ink);margin-bottom:14px;line-height:1.7}
   .opensug b{color:var(--green)}
 
-  /* ===== 冊子PDF ===== */
+  /* ===== 冊子PDF（エディトリアル装丁） ===== */
   #bookletRoot{display:none}
-  .bk-page{padding:4mm 2mm}
-  .bk-cover{text-align:center;padding-top:34mm}
-  .bk-emoji{font-size:60px;line-height:1}
-  .bk-title{font-family:var(--serif);font-size:30px;font-weight:700;letter-spacing:3px;margin:12px 0 6px}
-  .bk-sub{font-size:13px;color:#555}
-  .bk-kicker{margin-top:26px;font-size:11px;letter-spacing:5px;color:#999}
-  .bk-h{font-family:var(--serif);font-size:16px;font-weight:700;border-bottom:2px solid #ddd;padding-bottom:4px;margin:14px 0 8px}
-  .bk-body{font-family:var(--serif);font-size:13px;line-height:2;white-space:pre-wrap;margin-bottom:10px}
-  .bk-tl{font-size:11.5px;line-height:1.95;color:#333}
-  .bk-sum{font-size:14px;margin:6px 0 10px}
-  .bk-photos{display:grid;grid-template-columns:1fr 1fr;gap:4mm}
-  .bk-photos img{width:100%;border-radius:2mm;object-fit:cover}
+  #bookletRoot .bk-page{box-sizing:border-box;min-height:296mm;padding:22mm 20mm 26mm;position:relative;
+    background:#faf6ec;color:#241f18;font-family:var(--serif);overflow:hidden}
+  /* 表紙 */
+  #bookletRoot .bk-cover{padding:0}
+  #bookletRoot .bk-cover-panel{min-height:296mm;background:linear-gradient(162deg,#0f2e20 0%,#1b4332 46%,#2d6a4f 100%);
+    color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:34mm 18mm;position:relative}
+  #bookletRoot .bk-kick{font-size:11px;letter-spacing:7px;opacity:.78;margin-bottom:20mm;font-family:var(--sans)}
+  #bookletRoot .bk-cover-emoji{font-size:66px;line-height:1;margin-bottom:8mm}
+  #bookletRoot .bk-title{font-size:40px;font-weight:700;letter-spacing:5px;line-height:1.35;text-shadow:0 2px 12px rgba(0,0,0,.25)}
+  #bookletRoot .bk-goldrule{width:56px;height:3px;background:#c99a2e;margin:9mm 0 8mm}
+  #bookletRoot .bk-date{font-size:15px;letter-spacing:3px;font-variant-numeric:tabular-nums}
+  #bookletRoot .bk-place{font-size:12px;opacity:.85;margin-top:3mm;letter-spacing:2px}
+  #bookletRoot .bk-mtn{position:absolute;bottom:24mm;left:0;width:100%;height:60px}
+  #bookletRoot .bk-cover-foot{position:absolute;bottom:16mm;font-size:12px;letter-spacing:8px;opacity:.9}
+  /* 章見出し */
+  #bookletRoot .bk-sec{display:flex;align-items:baseline;gap:11px;border-bottom:2px solid #e3d9c4;padding-bottom:5mm;margin-bottom:9mm}
+  #bookletRoot .bk-secno{font-size:12px;letter-spacing:3px;color:#b98a26;font-weight:700}
+  #bookletRoot .bk-sectitle{font-size:21px;font-weight:700;letter-spacing:2px}
+  /* 物語（ドロップキャップ） */
+  #bookletRoot .bk-prose{font-size:14px;line-height:2.25;white-space:pre-wrap;text-align:justify}
+  #bookletRoot .bk-prose::first-letter{font-size:42px;font-weight:700;color:#1b4332;float:left;line-height:.9;margin:2px 7px 0 0}
+  /* 手紙（レターペーパー） */
+  #bookletRoot .bk-letter{border:1px solid #ddccae;background:#fffdf7;border-radius:3mm;padding:13mm 11mm;position:relative}
+  #bookletRoot .bk-letter::before{content:"";position:absolute;left:0;top:7mm;bottom:7mm;width:3px;background:#c1583b;border-radius:2px}
+  #bookletRoot .bk-letter-body{font-size:14px;line-height:2.35;white-space:pre-wrap}
+  #bookletRoot .bk-letter-sign{text-align:right;margin-top:9mm;font-size:13px;color:#8a7f6a;letter-spacing:1px}
+  /* 記録 */
+  #bookletRoot .bk-chips{display:flex;flex-wrap:wrap;gap:2.5mm;margin-bottom:8mm}
+  #bookletRoot .bk-chip{font-size:11.5px;background:#efe6d3;border-radius:20px;padding:2mm 4mm;font-family:var(--sans);font-weight:700}
+  #bookletRoot .bk-tlrow{display:flex;gap:6mm;padding:2.4mm 0;border-bottom:1px dotted #e0d6c0;font-size:13px}
+  #bookletRoot .bk-tlt{color:#8a7f6a;min-width:16mm;font-variant-numeric:tabular-nums;font-family:var(--sans)}
+  #bookletRoot .bk-tlrow.rec .bk-tlt{color:#c1583b;font-weight:700}
+  /* 写真 */
+  #bookletRoot .bk-photos{display:grid;grid-template-columns:1fr 1fr;gap:5mm}
+  #bookletRoot .bk-ph{background:#fff;border:1px solid #e3d9c4;padding:2mm 2mm 6mm;border-radius:1mm;box-shadow:0 1px 3px rgba(120,100,60,.12)}
+  #bookletRoot .bk-ph img{display:block;width:100%;height:52mm;object-fit:cover;border-radius:.5mm}
+  /* 柱（ページ下） */
+  #bookletRoot .bk-pagefoot{position:absolute;bottom:13mm;left:20mm;right:20mm;text-align:center;font-size:10px;
+    letter-spacing:4px;color:#b3a890;border-top:1px solid #e8e0cf;padding-top:3.5mm;font-family:var(--sans)}
   @media print{
-    @page{margin:12mm}
+    @page{margin:0}
     html,body{background:#fff !important;max-width:none !important;margin:0 !important;padding:0 !important}
     body>*:not(#bookletRoot){display:none !important}
-    #bookletRoot{display:block !important;color:#111}
-    .bk-page{page-break-after:always}
-    .bk-page:last-child{page-break-after:auto}
+    #bookletRoot{display:block !important}
+    #bookletRoot *{ -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; }
+    #bookletRoot .bk-page{page-break-after:always}
+    #bookletRoot .bk-page:last-child{page-break-after:auto}
   }
 </style>
 </head>
@@ -864,12 +895,19 @@ function renderLog(){
       const m=MOMENT_MAP[l.k]||{e:'•',n:l.k};
       const nav=l.lat!=null?'<a class="navb" href="'+mapUrl(l.lat+','+l.lng)+'" target="_blank" rel="noopener">🧭</a>':'';
       const sub=[l.memo?esc(l.memo):'',l.lat!=null?'📍記録あり':''].filter(Boolean).join(' ・ ');
-      return '<div class="li logi"><span class="lt">'+logTime(l.ts)+'</span>'+
+      return '<div class="li logi"><input type="time" class="ltedit" data-id="'+l.id+'" value="'+logTime(l.ts)+'" aria-label="時刻を変更">'+
         '<div class="lm"><b>'+m.e+' '+m.n+'</b>'+(sub?'<small>'+sub+'</small>':'')+'</div>'+
         nav+'<button class="xdel" data-id="'+l.id+'">✕</button></div>';
     }).join('');
     return '<div class="daysep">'+dayLabel(d)+'</div><div class="list">'+items+'</div>';
   }).join('');
+  // 時刻をあとから変更（押せなかった時用）
+  $('lglist').querySelectorAll('.ltedit').forEach(inp=>inp.onchange=()=>{
+    const lg=tr.logs.find(x=>x.id===inp.dataset.id);if(!lg||!inp.value)return;
+    const parts=inp.value.split(':'),h=+parts[0],mm=+parts[1];
+    const d=new Date(lg.ts);d.setHours(h,mm,0,0);lg.ts=d.getTime();
+    persist(false);renderLog();toast('🕐 時刻を変更しました');
+  });
   $('lglist').querySelectorAll('.xdel').forEach(b=>b.onclick=()=>{
     tr.logs=tr.logs.filter(l=>l.id!==b.dataset.id);persist();renderLog();});
   renderKids();
@@ -972,36 +1010,48 @@ function tripHP(tr){
 }
 
 /* ===== 冊子PDF（既存の物語/手紙/記録/写真を組版・印刷）— AI不要 ===== */
+function bkDate(s){return String(s||'').replace(/-/g,'.');}
 function buildBooklet(tr){
   const ty=TYPES[tr.type]||TYPES.other;
-  let h='<div class="bk-page bk-cover"><div class="bk-emoji">'+ty.e+'</div>'+
+  const K=['其の一','其の二','其の三','其の四','其の五','其の六','其の七'];let si=0;
+  const sec=t=>'<div class="bk-sec"><span class="bk-secno">'+(K[si++]||'')+'</span><span class="bk-sectitle">'+t+'</span></div>';
+  const foot=()=>'<div class="bk-pagefoot">'+esc(tr.name)+'</div>';
+  // 表紙
+  let h='<div class="bk-page bk-cover"><div class="bk-cover-panel">'+
+    '<div class="bk-kick">FAMILY ODEKAKE BOOK</div>'+
+    '<div class="bk-cover-emoji">'+ty.e+'</div>'+
     '<div class="bk-title">'+esc(tr.name)+'</div>'+
-    '<div class="bk-sub">'+esc(tr.start)+' 〜 '+esc(tr.end)+(tr.pref?' ・ '+esc(tr.pref):'')+(tr.dest?'（'+esc(tr.dest)+'）':'')+'</div>'+
-    '<div class="bk-kicker">家族の物語</div></div>';
-  // 物語＋手紙
-  let story='';
-  if(tr.story&&tr.story.text)story+='<div class="bk-h">📖 家族の物語</div><div class="bk-body">'+esc(tr.story.text)+'</div>';
-  (db.children||[]).forEach(c=>{const lt=(tr.letters||{})[c.id];
-    if(lt&&lt.text)story+='<div class="bk-h">✍️ '+esc(c.name)+'へ</div><div class="bk-body">'+esc(lt.text)+'</div>';});
-  if(story)h+='<div class="bk-page">'+story+'</div>';
-  // 記録ダイジェスト
+    '<div class="bk-goldrule"></div>'+
+    '<div class="bk-date">'+esc(bkDate(tr.start))+' — '+esc(bkDate(tr.end))+'</div>'+
+    ((tr.pref||tr.dest)?'<div class="bk-place">'+esc([tr.pref,tr.dest].filter(Boolean).join(' ・ '))+'</div>':'')+
+    '<svg class="bk-mtn" viewBox="0 0 400 60" preserveAspectRatio="none"><path d="M0 60 L60 22 L120 44 L190 8 L250 40 L320 16 L400 50 L400 60Z" fill="rgba(255,255,255,.13)"></path></svg>'+
+    '<div class="bk-cover-foot">家 族 の 物 語</div>'+
+    '</div></div>';
+  // 物語
+  if(tr.story&&tr.story.text)
+    h+='<div class="bk-page">'+sec('家族の物語')+'<div class="bk-prose">'+esc(tr.story.text)+'</div>'+foot()+'</div>';
+  // 手紙（お子さんごと）
+  (db.children||[]).forEach(c=>{const lt=(tr.letters||{})[c.id];if(lt&&lt.text)
+    h+='<div class="bk-page">'+sec(esc(c.name)+'への手紙')+
+      '<div class="bk-letter"><div class="bk-letter-body">'+esc(lt.text)+'</div>'+
+      '<div class="bk-letter-sign">— パパ・ママより</div></div>'+foot()+'</div>';});
+  // この日の記録
   const cnt={};(tr.logs||[]).forEach(l=>cnt[l.k]=(cnt[l.k]||0)+1);
-  const sum=MOMENTS.filter(m=>cnt[m.k]).map(m=>m.e+'×'+cnt[m.k]).join('  ');
+  const chips=MOMENTS.filter(m=>cnt[m.k]).map(m=>'<span class="bk-chip">'+m.e+' '+m.n+' ×'+cnt[m.k]+'</span>').join('');
   const items=[];
-  sortedEvents(tr).forEach(o=>items.push({t:o.e.t,x:'・'+o.e.title}));
-  (tr.logs||[]).forEach(l=>{const d=new Date(l.ts);items.push({t:pad(d.getHours())+':'+pad(d.getMinutes()),x:(MOMENT_MAP[l.k]||{e:'•',n:l.k}).e+' '+(MOMENT_MAP[l.k]||{n:l.k}).n+(l.memo?'（'+l.memo+'）':'')});});
+  sortedEvents(tr).forEach(o=>items.push({t:o.e.t,x:esc(o.e.title),rec:false}));
+  (tr.logs||[]).forEach(l=>{const d=new Date(l.ts),m=MOMENT_MAP[l.k]||{e:'•',n:l.k};
+    items.push({t:pad(d.getHours())+':'+pad(d.getMinutes()),x:m.e+' '+m.n+(l.memo?'（'+esc(l.memo)+'）':''),rec:true});});
   items.sort((a,b)=>a.t.localeCompare(b.t));
-  if(sum||items.length){
-    h+='<div class="bk-page"><div class="bk-h">🗓️ この日の記録</div>'+
-      (sum?'<div class="bk-sum">できごと：'+sum+'</div>':'')+
-      '<div class="bk-tl">'+items.map(it=>esc(it.t)+'　'+esc(it.x)).join('<br>')+'</div></div>';
-  }
-  // 写真（6枚ずつページ分け）
+  if(chips||items.length)
+    h+='<div class="bk-page">'+sec('この日の記録')+
+      (chips?'<div class="bk-chips">'+chips+'</div>':'')+
+      '<div class="bk-timeline">'+items.map(it=>'<div class="bk-tlrow'+(it.rec?' rec':'')+'"><span class="bk-tlt">'+esc(it.t)+'</span><span>'+it.x+'</span></div>').join('')+'</div>'+foot()+'</div>';
+  // 写真（6枚/ページ）
   const ph=tr.photos||[];
-  for(let i=0;i<ph.length;i+=6){
-    h+='<div class="bk-page">'+(i===0?'<div class="bk-h">📸 写真</div>':'')+'<div class="bk-photos">'+
-      ph.slice(i,i+6).map(src=>'<img src="'+src+'" alt="">').join('')+'</div></div>';
-  }
+  for(let i=0;i<ph.length;i+=6)
+    h+='<div class="bk-page">'+(i===0?sec('写真'):'')+'<div class="bk-photos">'+
+      ph.slice(i,i+6).map(src=>'<div class="bk-ph"><img src="'+src+'" alt=""></div>').join('')+'</div>'+foot()+'</div>';
   return h;
 }
 function printBooklet(){

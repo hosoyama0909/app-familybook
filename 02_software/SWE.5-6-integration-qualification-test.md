@@ -16,6 +16,7 @@
 | QTC-LOG-01 | きろくタブを開く→😭と🍼を記録 | 記録2件・サマリー"😭×1 🍼×1"・タイムライン表示 | SWR-LOG-01,02,05,06 | ✅ Pass |
 | QTC-LOG-02 | 位置情報を付与せず記録 | 記録は時刻付きで成立（0件にならない） | SWR-LOG-03 / SYR-N3 | ✅ Pass |
 | QTC-LOG-03 | メモを入れて記録 | log.memo反映＆入力欄クリア | SWR-LOG-04 | ✅ Pass |
+| QTC-EDIT-01 | 記録の時刻をあとから変更 | tsが更新され再整列・保持 | SWR-LOG-09 | ✅ Pass |
 | QTC-CHILD-01 | 生年月2021-05で登録 | "5歳2ヶ月"表示（基準2026-07） | SWR-CHILD-02 | ✅ Pass |
 | QTC-DATA-01 | 記録後リロード | 記録・お子さんが保持される | SWR-DATA-01 | ✅ Pass |
 | QTC-REG-01 | スケジュールタブ表示 | 既存seed予定が従来通り描画 | SWR-CORE-01 | ✅ Pass |

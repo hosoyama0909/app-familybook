@@ -56,6 +56,11 @@ check('QTC-LOG-03', stored.fussMemo === 'おなかすいた' && stored.milkMemo 
 // QTC-LOG-02: 位置を付与しなくても記録は成立する
 check('QTC-LOG-02', stored.logs === 2, '位置未付与でも記録2件 (geo=' + stored.anyGeo + ')');
 
+// QTC-EDIT-01: 記録の時刻をあとから変更できる（押せなかった時用）
+await page.fill('.ltedit', '07:05'); await page.dispatchEvent('.ltedit', 'change'); await page.waitForTimeout(150);
+const editedHM = await page.evaluate(() => { const d = JSON.parse(localStorage.getItem('odekake_v1')); const t = d.trips.find(x => x.id === d.active); const dt = new Date(t.logs.find(l => l.k === 'milk').ts); return dt.getHours() + ':' + String(dt.getMinutes()).padStart(2, '0'); });
+check('QTC-EDIT-01', editedHM === '7:05', 'ミルクの時刻変更 → ' + editedHM);
+
 // QTC-CHILD-01: 年齢自動計算（基準は実行時の当月。2021-05を登録し形式を確認）
 await page.fill('#kidName', '長女');
 await page.fill('#kidBirth', '2021-05');
