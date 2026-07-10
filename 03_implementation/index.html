@@ -292,6 +292,29 @@
   .opensug{background:var(--card);border:1px dashed var(--green2);border-radius:14px;padding:12px 14px;
     font-size:13px;color:var(--ink);margin-bottom:14px;line-height:1.7}
   .opensug b{color:var(--green)}
+
+  /* ===== 冊子PDF ===== */
+  #bookletRoot{display:none}
+  .bk-page{padding:4mm 2mm}
+  .bk-cover{text-align:center;padding-top:34mm}
+  .bk-emoji{font-size:60px;line-height:1}
+  .bk-title{font-family:var(--serif);font-size:30px;font-weight:700;letter-spacing:3px;margin:12px 0 6px}
+  .bk-sub{font-size:13px;color:#555}
+  .bk-kicker{margin-top:26px;font-size:11px;letter-spacing:5px;color:#999}
+  .bk-h{font-family:var(--serif);font-size:16px;font-weight:700;border-bottom:2px solid #ddd;padding-bottom:4px;margin:14px 0 8px}
+  .bk-body{font-family:var(--serif);font-size:13px;line-height:2;white-space:pre-wrap;margin-bottom:10px}
+  .bk-tl{font-size:11.5px;line-height:1.95;color:#333}
+  .bk-sum{font-size:14px;margin:6px 0 10px}
+  .bk-photos{display:grid;grid-template-columns:1fr 1fr;gap:4mm}
+  .bk-photos img{width:100%;border-radius:2mm;object-fit:cover}
+  @media print{
+    @page{margin:12mm}
+    html,body{background:#fff !important;max-width:none !important;margin:0 !important;padding:0 !important}
+    body>*:not(#bookletRoot){display:none !important}
+    #bookletRoot{display:block !important;color:#111}
+    .bk-page{page-break-after:always}
+    .bk-page:last-child{page-break-after:auto}
+  }
 </style>
 </head>
 <body>
@@ -520,6 +543,8 @@
 
 <div class="note">💾 入力は自動保存 ・ 📱 Safariで開いて「ホーム画面に追加」でアプリ化 🌿</div>
 <div class="toast" id="toast">💾 保存しました</div>
+
+<div id="bookletRoot" aria-hidden="true"></div>
 
 <nav class="bnav" id="bnav">
   <button class="active" data-page="home"><span class="ic">🏠</span>ホーム</button>
@@ -907,7 +932,9 @@ function renderRecap(){
     '<div class="tc"><b>'+esc(it.title)+'</b>'+(it.note?'<small>'+esc(it.note)+'</small>':'')+'</div>'+
     '<span class="tag2 '+(it.kind==='rec'?'rec':'plan')+'">'+(it.kind==='rec'?'記録':'予定')+'</span></div>').join('')+'</div>')
     : '<div class="empty">予定やきろくがここに時系列で並びます。<br>スケジュールを入れ、当日きろくを押してみよう。</div>';
-  body.innerHTML=head+tripHP(tr)+tripAwards(tr)+tl;
+  const bookletBtn='<button class="storybtn ghost" id="makeBooklet" style="margin-bottom:14px">📕 この旅を冊子（PDF）にする</button>';
+  body.innerHTML=head+bookletBtn+tripHP(tr)+tripAwards(tr)+tl;
+  const mb=$('makeBooklet');if(mb)mb.onclick=printBooklet;
   renderStory();
 }
 
@@ -942,6 +969,46 @@ function tripHP(tr){
   return '<div class="hpcard"><div class="sh">💪 親のがんばりメーター</div>'+
     '<div class="hpbar"><i style="width:'+ganbari+'%"></i></div>'+
     '<div class="hpmsg">'+msg+'（がんばり度 '+ganbari+'）</div></div>';
+}
+
+/* ===== 冊子PDF（既存の物語/手紙/記録/写真を組版・印刷）— AI不要 ===== */
+function buildBooklet(tr){
+  const ty=TYPES[tr.type]||TYPES.other;
+  let h='<div class="bk-page bk-cover"><div class="bk-emoji">'+ty.e+'</div>'+
+    '<div class="bk-title">'+esc(tr.name)+'</div>'+
+    '<div class="bk-sub">'+esc(tr.start)+' 〜 '+esc(tr.end)+(tr.pref?' ・ '+esc(tr.pref):'')+(tr.dest?'（'+esc(tr.dest)+'）':'')+'</div>'+
+    '<div class="bk-kicker">家族の物語</div></div>';
+  // 物語＋手紙
+  let story='';
+  if(tr.story&&tr.story.text)story+='<div class="bk-h">📖 家族の物語</div><div class="bk-body">'+esc(tr.story.text)+'</div>';
+  (db.children||[]).forEach(c=>{const lt=(tr.letters||{})[c.id];
+    if(lt&&lt.text)story+='<div class="bk-h">✍️ '+esc(c.name)+'へ</div><div class="bk-body">'+esc(lt.text)+'</div>';});
+  if(story)h+='<div class="bk-page">'+story+'</div>';
+  // 記録ダイジェスト
+  const cnt={};(tr.logs||[]).forEach(l=>cnt[l.k]=(cnt[l.k]||0)+1);
+  const sum=MOMENTS.filter(m=>cnt[m.k]).map(m=>m.e+'×'+cnt[m.k]).join('  ');
+  const items=[];
+  sortedEvents(tr).forEach(o=>items.push({t:o.e.t,x:'・'+o.e.title}));
+  (tr.logs||[]).forEach(l=>{const d=new Date(l.ts);items.push({t:pad(d.getHours())+':'+pad(d.getMinutes()),x:(MOMENT_MAP[l.k]||{e:'•',n:l.k}).e+' '+(MOMENT_MAP[l.k]||{n:l.k}).n+(l.memo?'（'+l.memo+'）':'')});});
+  items.sort((a,b)=>a.t.localeCompare(b.t));
+  if(sum||items.length){
+    h+='<div class="bk-page"><div class="bk-h">🗓️ この日の記録</div>'+
+      (sum?'<div class="bk-sum">できごと：'+sum+'</div>':'')+
+      '<div class="bk-tl">'+items.map(it=>esc(it.t)+'　'+esc(it.x)).join('<br>')+'</div></div>';
+  }
+  // 写真（6枚ずつページ分け）
+  const ph=tr.photos||[];
+  for(let i=0;i<ph.length;i+=6){
+    h+='<div class="bk-page">'+(i===0?'<div class="bk-h">📸 写真</div>':'')+'<div class="bk-photos">'+
+      ph.slice(i,i+6).map(src=>'<img src="'+src+'" alt="">').join('')+'</div></div>';
+  }
+  return h;
+}
+function printBooklet(){
+  const tr=T();if(!tr){toast('先におでかけを選んでね');return;}
+  $('bookletRoot').innerHTML=buildBooklet(tr);
+  toast('📕 印刷／PDF保存の画面を開きます');
+  setTimeout(()=>{try{window.print();}catch(e){toast('共有→プリント からPDF保存してください');}},250);
 }
 
 /* ===== AI物語・手紙（Cloudflare Worker + Gemini） ===== */
