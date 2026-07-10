@@ -13,7 +13,7 @@
 | Stop 1 | 当日モード（きろく/お子さん） | ✅ 完了 | SWR-LOG-*, /test |
 | Stop 2 | 記録変換・ヒストリーマップ | ✅ 完了 | ふりかえり/ちず, QTC-REC/PREF |
 | Stop 3 | AI物語（Worker+Gemini）＋あるある大賞 | ✅ 完了・実機稼働（gemini-flash-lite-latest） | worker/, StoryService, QTC-STORY/AWARD |
-| Stop 4 | 学習・提案 | 予定 | — |
+| Stop 4 | 学習・提案（親HP/傾向/休憩/開拓）＋手紙 | ✅ 実装完了（要クローズドテスト） | InsightsEngine, QTC-HP/LEARN/OPEN |
 | Stop 5 | 事業化準備 | 予定 | — |
 
 ## 体制・役割

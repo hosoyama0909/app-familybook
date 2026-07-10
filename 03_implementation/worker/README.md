@@ -4,9 +4,13 @@
 Cloudflare Worker です。**APIキーはこの Worker の中だけに保持**し、アプリ本体（公開ページ）には出しません。
 
 ```
-[ブラウザ(PWA)] --POST 最小化データ--> [この Worker] --キー付き--> [Gemini API]
-                                    <---- 物語テキスト ----
+[ブラウザ(PWA)] --POST {prompt}--> [この Worker] --キー付き--> [Gemini API]
+                                 <---- {story:テキスト} ----
 ```
+
+> **汎用リレー**：この Worker は `payload.prompt`（アプリ側で組んだ指示文）を優先して受け取る。
+> そのため 物語・手紙 など新しいAI機能を足しても **Worker の貼り替えは不要**（プロンプトはアプリ側で変える）。
+> 旧形式（trip/timeline を渡す）にも後方互換で対応。
 
 ## 事前に用意するもの
 - Google アカウント（Gemini APIキー取得用）

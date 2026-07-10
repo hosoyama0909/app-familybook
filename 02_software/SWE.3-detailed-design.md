@@ -122,9 +122,28 @@ Worker側（`worker/story-worker.js`）：OPTIONSでCORSプリフライト応答
 `buildPrompt(payload)`→Gemini `generateContent` 呼び出し→`{story}` を返す。
 キーは env.GEMINI_API_KEY（secret）。**プロンプトはWorker側で組む**（改良時にフロント再デプロイ不要）。
 
+## SWD-letter / SWD-insights（Stop 4）
+割当：SWR-LETTER-*, SWR-HP-01, SWR-LEARN-01, SWR-OPEN-01, SWR-WORKER-02
+```
+Worker汎用化:  prompt ← payload.prompt があればそれ、無ければ buildPrompt(payload)
+             → 物語も手紙も同じWorkerで動く（新AI機能でWorker再デプロイ不要）
+
+buildLetterPrompt(tr, child):  子の呼び名＋当時年齢＋ tripFactsText(tr) から手紙指示を組む
+generateLetter(childId):       POST {prompt} → tr.letters[childId]={text,ts} 保存・再表示
+
+tripHP(tr):        effort = fuss*3 + hold*2 + diaper + milk + nap*0.5
+                   がんばり度 = min(100, round(effort*9))。件数に応じ労いメッセージ
+learnInsights():   全trips.logs を集約（3件未満はnull）
+                   ・グズり最多時間帯
+                   ・各tripの「最初の記録→初グズり」経過分の平均 avgGapMin
+renderHomeInsights(): 上記＋「休憩の目安 = avgGap-15分」をホームカードに提示
+openingSuggestion(counts): 地方別訪問数から最多地方＋未訪問地方を提案
+```
+
 ## データ構造（詳細）
 ```
-trip 追加 : pref:string（''=未設定, 例 '神奈川県'）, story?:{text:string, ts:epoch_ms}（Stop3）
+trip 追加 : pref:string, story?:{text,ts}, letters?:{ [childId]:{text,ts} }（Stop4）
+（旧記載）  pref:string（''=未設定, 例 '神奈川県'）, story?:{text:string, ts:epoch_ms}（Stop3）
 db 追加   : storyUrl:string（AI中継WorkerのURL, ''=未設定）（Stop3）
 log      : { id:'l'+ts+'_'+rand, k:MOMENTS.k, ts:epoch_ms, memo:string, lat?:num, lng?:num }
 child    : { id:'c'+seq, name:string, birth:'YYYY-MM' }
