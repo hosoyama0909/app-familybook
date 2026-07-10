@@ -8,10 +8,18 @@
   リポジトリ直下の転送用ページ。
   本体は 03_implementation/index.html。GitHub Pages が「ブランチ配信」でも
   「GitHub Actions 配信」でも、どちらでもアプリが開くようにするための入口。
+  ここで毎回キャッシュ回避のためのパラメータ(?v=時刻)を付けて本体を読み込むので、
+  更新後に古い画面が残らない（本体HTMLは常に最新を取得）。
 -->
 <link rel="canonical" href="./03_implementation/index.html">
 <meta http-equiv="refresh" content="0; url=./03_implementation/index.html">
-<script>location.replace('./03_implementation/index.html' + location.search + location.hash);</script>
+<script>
+  (function(){
+    var base='./03_implementation/index.html';
+    var q=location.search ? location.search+'&v='+Date.now() : '?v='+Date.now();
+    location.replace(base+q+location.hash);
+  })();
+</script>
 <style>
   body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;
     background:#f4efe6;color:#2a2620;display:grid;place-items:center;min-height:100vh;margin:0;text-align:center}
