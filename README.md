@@ -4,7 +4,7 @@
 「親になった人だけが分かる感情」を形にすることをコンセプトにしている。
 
 - 実装：`03_implementation/index.html`（単一ファイルのPWA・サーバ不要・ログイン不要）
-- ロードマップ：`private` リポジトリの `PLAN.md` / `roadmap.html`
+- ロードマップ：`docs-private` の `30_Projects/アプリ開発/`（PLAN.md / roadmap.html）
 - 公開URL（GitHub Pages）：https://hosoyama0909.github.io/app-familybook/ （下記「配信」参照）
 
 ## 開発プロセス（A-SPICE テーラリング版）
