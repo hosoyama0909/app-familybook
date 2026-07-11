@@ -34,6 +34,7 @@ node 04_test/qualification/log-feature.mjs
 | stop2-recap-atlas.mjs | ふりかえり・都道府県ヒストリー・回帰 | `02_software/SWE.5-6-integration-qualification-test.md` |
 | stop3-story.mjs | AI物語のクライアント統合（Worker応答はモック）・回帰 | `02_software/SWE.5-6-integration-qualification-test.md` |
 | stop4-letter-learn.mjs | 子どもへの手紙（モック）・親HP・学習・開拓提案・回帰 | `02_software/SWE.5-6-integration-qualification-test.md` |
+| ui-batch.mjs | Undo・予定編集・きろく日付変更・持ち物カウント | `02_software/SWE.5-6-integration-qualification-test.md` |
 
 ## TODO
 - `unit/` に `ageStr` 等の純関数テストを追加（DOM非依存）。

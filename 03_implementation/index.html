@@ -109,6 +109,8 @@
   .li .rank{width:24px;height:24px;flex:none;border-radius:50%;background:var(--gold);color:#3a2c00;
     display:grid;place-items:center;font-weight:800;font-size:12px}
   .li .st{flex:none;font-size:10px;font-weight:800;padding:3px 8px;border-radius:9px;background:var(--bg2);color:var(--sub)}
+  .li .evtap{cursor:pointer}
+  .li.evediting{background:color-mix(in srgb,var(--gold) 14%,var(--card));outline:2px solid var(--gold);outline-offset:-2px}
   .li .st.now{background:var(--accent);color:#fff}
   .li .st.soon{background:var(--gold);color:#3a2c00}
   .navb{flex:none;background:var(--sky);color:#fff;text-decoration:none;font-size:11.5px;font-weight:700;
@@ -157,8 +159,13 @@
 
   .note{font-size:11px;color:var(--sub);text-align:center;margin:20px 10px 6px;line-height:1.8}
   .toast{position:fixed;bottom:96px;left:50%;transform:translateX(-50%) translateY(20px);opacity:0;
-    background:var(--ink);color:var(--bg);font-size:12.5px;padding:9px 18px;border-radius:20px;transition:.3s;z-index:200;pointer-events:none;font-weight:600}
+    background:var(--ink);color:var(--bg);font-size:12.5px;padding:9px 18px;border-radius:20px;transition:.3s;z-index:200;pointer-events:none;font-weight:600;
+    display:flex;align-items:center;gap:10px;white-space:nowrap}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  .toast.undoable{pointer-events:auto}
+  #toastUndo{background:var(--gold);color:#3a2c00;border:none;border-radius:12px;padding:5px 12px;
+    font-weight:800;font-size:12px;cursor:pointer;flex:none}
+  #toastUndo[hidden]{display:none}
 
   .bnav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:560px;z-index:60;display:flex;
     background:color-mix(in srgb,var(--card) 93%,transparent);backdrop-filter:blur(14px);
@@ -190,8 +197,10 @@
   .daysep{font-family:var(--serif);font-size:12.5px;font-weight:700;color:var(--sub);letter-spacing:1px;margin:16px 2px 7px}
   .logi .lt{color:var(--accent);min-width:42px}
   .ltedit{flex:none;border:1px solid var(--line);border-radius:9px;background:var(--bg2);color:var(--accent);
-    font-weight:800;font-size:12.5px;padding:5px 6px;font-family:inherit;width:78px;font-variant-numeric:tabular-nums}
+    font-weight:800;font-size:12px;padding:6px 6px;font-family:inherit;max-width:172px;font-variant-numeric:tabular-nums}
   .ltedit:focus{outline:2px solid var(--green2)}
+  .logc-mid{display:flex;gap:7px;margin-top:7px;align-items:center}
+  .logc-mid .lmemoedit{margin-top:0;flex:1;width:auto}
   .lgtop{display:flex;gap:8px;margin-bottom:12px}
   .lgchildsel{flex:none;max-width:42%;border:1px solid var(--line);border-radius:12px;padding:10px 10px;font-size:13px;
     font-family:inherit;background:var(--bg2);color:var(--ink)}
@@ -438,6 +447,7 @@
       <input class="grow" id="evMap" type="text" placeholder="地図検索ワード（任意）">
     </div>
     <button class="addbtn" id="evAdd">＋ この日に予定を追加</button>
+    <button class="addbtn" id="evCancel" style="display:none;background:var(--bg2);color:var(--ink);margin-top:8px">編集をやめる（キャンセル）</button>
   </div>
 </section>
 
@@ -540,6 +550,7 @@
   <div class="editorial">CHECKLIST</div>
   <div class="sec-title">🎒 持ち物チェック</div>
   <div class="prog"><i id="prog-pack"></i></div>
+  <div class="sec-sub" id="pkcount" style="text-align:right;font-variant-numeric:tabular-nums"></div>
   <div class="list chk" id="pklist"></div>
   <div class="form">
     <div class="frow">
@@ -591,7 +602,7 @@
 </section>
 
 <div class="note">💾 入力は自動保存 ・ 📱 Safariで開いて「ホーム画面に追加」でアプリ化 🌿</div>
-<div class="toast" id="toast">💾 保存しました</div>
+<div class="toast" id="toast"><span id="toastMsg">💾 保存しました</span><button id="toastUndo" hidden>↩︎ 元に戻す</button></div>
 
 <div id="bookletRoot" aria-hidden="true"></div>
 
@@ -698,8 +709,25 @@ db.trips.forEach(t=>{if(!Array.isArray(t.logs))t.logs=[];if(typeof t.pref!=='str
 let tT;
 function persist(show){try{localStorage.setItem(KEY,JSON.stringify(db));if(show!==false)toast('💾 保存しました');}
   catch(e){toast('⚠️ 保存容量オーバー（写真を減らして）');}}
-function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');
-  clearTimeout(tT);tT=setTimeout(()=>t.classList.remove('show'),1400);}
+function toast(m,undoable){const t=document.getElementById('toast');
+  document.getElementById('toastMsg').textContent=m;
+  document.getElementById('toastUndo').hidden=!undoable;
+  t.classList.toggle('undoable',!!undoable);t.classList.add('show');
+  clearTimeout(tT);tT=setTimeout(()=>t.classList.remove('show'),undoable?5000:1400);}
+function toastU(m){toast(m,undoStack.length>0);}
+
+/* ===== 操作の取り消し（Undo）：変更前スナップショットを積む ===== */
+const undoStack=[];
+function snap(label){
+  undoStack.push({label:label,data:JSON.stringify(db)});
+  if(undoStack.length>5)undoStack.shift(); // 写真(base64)を含むためメモリ配慮で5世代まで
+}
+function doUndo(){
+  const s=undoStack.pop();if(!s){toast('戻す操作がありません');return;}
+  db=JSON.parse(s.data);persist(false);renderAll();
+  toast('↩︎ '+s.label+'を元に戻しました');
+}
+document.getElementById('toastUndo').onclick=doUndo;
 function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function $(id){return document.getElementById(id);}
 function T(){return db.trips.find(t=>t.id===db.active)||db.trips[0];}
@@ -739,6 +767,9 @@ function go(id){
   // ふりかえり/ちず は他タブのデータを集約するため、表示のたびに最新化
   if(id==='recap')renderRecap();
   else if(id==='atlas')renderAtlas();
+  // 上部タブが画面外に隠れないよう、選択タブを見える位置へ
+  const at=document.querySelector('#tabs .tab.active');
+  if(at)at.scrollIntoView({inline:'center',block:'nearest',behavior:'smooth'});
   window.scrollTo({top:0,behavior:'smooth'});
 }
 document.querySelectorAll('#tabs .tab,#bnav button').forEach(el=>el.onclick=()=>go(el.dataset.page));
@@ -776,10 +807,11 @@ function renderHome(){
   wrap.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{
     const tr=db.trips.find(t=>t.id===b.dataset.del);
     if(!confirm('「'+tr.name+'」を削除しますか？（予定・写真・記録も消えます）'))return;
+    snap('おでかけの削除');
     db.trips=db.trips.filter(t=>t.id!==tr.id);
     if(!db.trips.length){db.trips=[];db.active=null;}
     else if(db.active===tr.id)db.active=db.trips[0].id;
-    persist();renderAll();
+    persist(false);renderAll();toastU('🗑 「'+tr.name+'」を削除しました');
   });
   $('editTrips').textContent=editMode?'✅ 編集おわり':'✏️ 編集（削除）モード';
   renderHomeInsights();
@@ -836,33 +868,66 @@ function renderSched(){
     const hit=days.find(d=>d.date>=today);
     selDay[tr.id]=(hit||days[0]).date;
   }
+  const todayStr=fdate(new Date());
   $('daypills').innerHTML=days.map(d=>
-    '<button class="dp'+(d.date===selDay[tr.id]?' on':'')+'" data-d="'+d.date+'">'+d.label+'<br><small>'+d.sub+'</small></button>').join('');
+    '<button class="dp'+(d.date===selDay[tr.id]?' on':'')+'" data-d="'+d.date+'">'+d.label+
+    (d.date===todayStr?' <small>●今日</small>':'')+'<br><small>'+d.sub+'</small></button>').join('');
   $('daypills').querySelectorAll('.dp').forEach(b=>b.onclick=()=>{selDay[tr.id]=b.dataset.d;renderSched();});
   const evs=sortedEvents(tr).filter(o=>o.e.d===selDay[tr.id]);
   $('evlist').innerHTML=evs.map(o=>{
     const ev=o.e;
     const nav=ev.map?'<a class="navb" href="'+mapUrl(ev.map)+'" target="_blank" rel="noopener">🧭</a>':'';
-    return '<div class="li" data-ev="'+ev.d+'T'+ev.t+'"><span class="lt">'+ev.t+'</span>'+
-      '<div class="lm"><b>'+esc(ev.title)+'</b>'+(ev.note?'<small>'+esc(ev.note)+'</small>':'')+'</div>'+
+    return '<div class="li'+(evEdit===o.i?' evediting':'')+'" data-ev="'+ev.d+'T'+ev.t+'"><span class="lt">'+ev.t+'</span>'+
+      '<div class="lm evtap" data-i="'+o.i+'" role="button" title="タップで編集"><b>'+esc(ev.title)+'</b>'+(ev.note?'<small>'+esc(ev.note)+'</small>':'')+'</div>'+
       '<span class="st">—</span>'+nav+'<button class="xdel" data-i="'+o.i+'">✕</button></div>';
   }).join('')||'<div class="empty">この日の予定はまだありません。下から追加！</div>';
+  // 行タップ → フォームに読み込んで編集モード（間違い修正が削除→再作成なしでできる）
+  $('evlist').querySelectorAll('.evtap').forEach(el=>el.onclick=()=>{
+    const ev=tr.schedule[+el.dataset.i];if(!ev)return;
+    evEdit=+el.dataset.i;
+    $('evTime').value=ev.t;$('evTitle').value=ev.title;$('evNote').value=ev.note||'';$('evMap').value=ev.map||'';
+    $('evAdd').textContent='✔️ この予定を更新';$('evCancel').style.display='block';
+    renderSched();$('evTitle').focus();
+  });
   $('evlist').querySelectorAll('.xdel').forEach(b=>b.onclick=()=>{
-    tr.schedule.splice(+b.dataset.i,1);persist();renderSched();renderMap();});
+    snap('予定の削除');
+    if(evEdit===+b.dataset.i)cancelEvEdit();
+    tr.schedule.splice(+b.dataset.i,1);persist(false);renderSched();renderMap();
+    toastU('🗑 予定を削除しました');});
   updateChips();
 }
+let evEdit=null; // 編集中の schedule index（null=新規追加モード）
+function cancelEvEdit(){
+  evEdit=null;
+  $('evTitle').value='';$('evNote').value='';$('evMap').value='';
+  $('evAdd').textContent='＋ この日に予定を追加';$('evCancel').style.display='none';
+}
+$('evCancel').onclick=()=>{cancelEvEdit();renderSched();};
 $('evAdd').onclick=()=>{
   const tr=T();if(!tr){toast('先におでかけを作成してね');return;}
   const t=$('evTime').value||'09:00',title=$('evTitle').value.trim();
   if(!title){toast('予定名を入れてね');return;}
-  tr.schedule.push({d:selDay[tr.id],t:t,title:title,note:$('evNote').value.trim(),map:$('evMap').value.trim()});
-  $('evTitle').value='';$('evNote').value='';$('evMap').value='';
-  persist();renderSched();renderMap();updateCountdown();
+  if(evEdit!=null&&tr.schedule[evEdit]){
+    snap('予定の変更');
+    const ev=tr.schedule[evEdit];
+    ev.t=t;ev.title=title;ev.note=$('evNote').value.trim();ev.map=$('evMap').value.trim();
+    cancelEvEdit();
+    persist(false);renderSched();renderMap();updateCountdown();
+    toastU('✏️ 予定を更新しました');
+  }else{
+    snap('予定の追加');
+    tr.schedule.push({d:selDay[tr.id],t:t,title:title,note:$('evNote').value.trim(),map:$('evMap').value.trim()});
+    $('evTitle').value='';$('evNote').value='';$('evMap').value='';
+    persist(false);renderSched();renderMap();updateCountdown();
+    toastU('＋ 予定を追加しました');
+  }
 };
 
 /* ===== きろく（当日モード） ===== */
 let lastGeo=null,lastGeoAt=0;
 function logTime(ts){const d=new Date(ts);return pad(d.getHours())+':'+pad(d.getMinutes());}
+function dtLocalVal(ts){const d=new Date(ts);
+  return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())+'T'+pad(d.getHours())+':'+pad(d.getMinutes());}
 function dayLabel(iso){const d=pdate(iso);const today=fdate(new Date());
   const pre=iso===today?'今日 ':'';return pre+(d.getMonth()+1)+'/'+d.getDate()+'（'+WD[d.getDay()]+'）';}
 
@@ -878,13 +943,14 @@ function recordMoment(k){
   if(!Array.isArray(tr.logs))tr.logs=[];
   const memo=$('lgMemo').value.trim();
   const childId=$('lgChild')?$('lgChild').value:'';
+  snap('きろく');
   const log={id:'l'+Date.now()+'_'+Math.floor(Math.random()*1000),k:k,ts:Date.now(),memo:memo,childId:childId};
   const fresh=lastGeo&&(Date.now()-lastGeoAt<120000);
   if(fresh){log.lat=lastGeo.lat;log.lng=lastGeo.lng;}
   tr.logs.push(log);
   $('lgMemo').value='';
   persist(false);
-  const m=MOMENT_MAP[k];toast(m.e+' '+m.n+'を記録');
+  const m=MOMENT_MAP[k];toastU(m.e+' '+m.n+'を記録');
   renderLog();
   if(!fresh&&navigator.geolocation){
     navigator.geolocation.getCurrentPosition(p=>{
@@ -921,20 +987,22 @@ function renderLog(){
       const nav=l.lat!=null?'<a class="navb" href="'+mapUrl(l.lat+','+l.lng)+'" target="_blank" rel="noopener">🧭</a>':'';
       const csel=hasKids?'<select class="lchild" data-id="'+l.id+'">'+childOptions(l.childId||'')+'</select>':'';
       return '<div class="logc"><div class="logc-top">'+
-        '<input type="time" class="ltedit" data-id="'+l.id+'" value="'+logTime(l.ts)+'" aria-label="時刻を変更">'+
         '<span class="logc-label">'+m.e+' '+m.n+'</span>'+csel+nav+
         '<button class="xdel" data-id="'+l.id+'">✕</button></div>'+
-        '<input class="lmemoedit" data-id="'+l.id+'" placeholder="メモ（あとから編集できます）" value="'+esc(l.memo||'')+'">'+
-        '</div>';
+        '<div class="logc-mid">'+
+        '<input type="datetime-local" class="ltedit" data-id="'+l.id+'" value="'+dtLocalVal(l.ts)+'" aria-label="日時を変更">'+
+        '<input class="lmemoedit" data-id="'+l.id+'" placeholder="メモ（後から編集OK）" value="'+esc(l.memo||'')+'">'+
+        '</div></div>';
     }).join('');
     return '<div class="daysep">'+dayLabel(d)+'</div><div class="list">'+items+'</div>';
   }).join('');
-  // 時刻をあとから変更（押せなかった時用）→ 再整列
+  // 日時をあとから変更（押せなかった時・別日の分の補正）→ 再整列
   $('lglist').querySelectorAll('.ltedit').forEach(inp=>inp.onchange=()=>{
     const lg=tr.logs.find(x=>x.id===inp.dataset.id);if(!lg||!inp.value)return;
-    const parts=inp.value.split(':'),h=+parts[0],mm=+parts[1];
-    const d=new Date(lg.ts);d.setHours(h,mm,0,0);lg.ts=d.getTime();
-    persist(false);renderLog();toast('🕐 時刻を変更しました');
+    const nd=new Date(inp.value);if(isNaN(nd))return;
+    snap('日時の変更');
+    lg.ts=nd.getTime();
+    persist(false);renderLog();toastU('🕐 日時を変更しました');
   });
   // メモをあとから編集
   $('lglist').querySelectorAll('.lmemoedit').forEach(inp=>inp.onchange=()=>{
@@ -945,7 +1013,9 @@ function renderLog(){
     const lg=tr.logs.find(x=>x.id===sel.dataset.id);if(!lg)return;
     lg.childId=sel.value;persist(false);});
   $('lglist').querySelectorAll('.xdel').forEach(b=>b.onclick=()=>{
-    tr.logs=tr.logs.filter(l=>l.id!==b.dataset.id);persist();renderLog();});
+    snap('きろくの削除');
+    tr.logs=tr.logs.filter(l=>l.id!==b.dataset.id);persist(false);renderLog();
+    toastU('🗑 きろくを削除しました');});
   renderKids();
 }
 
@@ -1280,7 +1350,7 @@ function renderMeals(){
     '<button class="xdel" data-i="'+i+'">✕</button></div>').join('')||
     '<div class="empty">お店がまだありません。候補を追加！</div>';
   $('mllist').querySelectorAll('.xdel').forEach(b=>b.onclick=()=>{
-    tr.meals.splice(+b.dataset.i,1);persist();renderMeals();renderMap();});
+    snap('お店の削除');tr.meals.splice(+b.dataset.i,1);persist(false);renderMeals();renderMap();toastU('🗑 お店を削除しました');});
 }
 $('mlAdd').onclick=()=>{
   const tr=T();if(!tr){toast('先におでかけを作成してね');return;}
@@ -1305,7 +1375,7 @@ function renderMap(){
     (r.del!=null?'<button class="xdel" data-i="'+r.del+'">✕</button>':'')+'</div>').join('')||
     '<div class="empty">地図付きの予定・お店・スポットがここに並びます</div>';
   $('splist').querySelectorAll('.xdel').forEach(b=>b.onclick=()=>{
-    tr.spots.splice(+b.dataset.i,1);persist();renderMap();});
+    snap('スポットの削除');tr.spots.splice(+b.dataset.i,1);persist(false);renderMap();toastU('🗑 スポットを削除しました');});
 }
 $('spAdd').onclick=()=>{
   const tr=T();if(!tr){toast('先におでかけを作成してね');return;}
@@ -1324,7 +1394,7 @@ function renderPhotos(){
   g.innerHTML=tr.photos.map((src,i)=>
     '<div class="ph"><img src="'+src+'" alt="思い出の写真"><button data-i="'+i+'" aria-label="削除">✕</button></div>').join('');
   g.querySelectorAll('button').forEach(b=>b.onclick=()=>{
-    if(confirm('この写真を削除しますか？')){tr.photos.splice(+b.dataset.i,1);persist();renderPhotos();}});
+    snap('写真の削除');tr.photos.splice(+b.dataset.i,1);persist(false);renderPhotos();toastU('🗑 写真を削除しました');});
 }
 $('albinput').onchange=e=>{
   const tr=T();if(!tr){toast('先におでかけを作成してね');return;}
@@ -1354,12 +1424,15 @@ function renderPack(){
   $('pklist').querySelectorAll('input').forEach(b=>b.onchange=()=>{
     tr.pack[+b.dataset.i].c=b.checked;persist();prog();});
   $('pklist').querySelectorAll('.xdel').forEach(b=>b.onclick=ev=>{
-    ev.preventDefault();tr.pack.splice(+b.dataset.i,1);persist();renderPack();});
+    ev.preventDefault();snap('持ち物の削除');tr.pack.splice(+b.dataset.i,1);persist(false);renderPack();toastU('🗑 持ち物を削除しました');});
   prog();
 }
 function prog(){
-  const tr=T();if(!tr||!tr.pack.length){$('prog-pack').style.width='0';return;}
-  $('prog-pack').style.width=(tr.pack.filter(p=>p.c).length/tr.pack.length*100)+'%';
+  const tr=T();
+  if(!tr||!tr.pack.length){$('prog-pack').style.width='0';if($('pkcount'))$('pkcount').textContent='';return;}
+  const done=tr.pack.filter(p=>p.c).length;
+  $('prog-pack').style.width=(done/tr.pack.length*100)+'%';
+  if($('pkcount'))$('pkcount').textContent=done+' / '+tr.pack.length+' そろった'+(done===tr.pack.length?' 🎉 準備完了！':'');
 }
 $('pkAdd').onclick=()=>{
   const tr=T();if(!tr){toast('先におでかけを作成してね');return;}
@@ -1385,7 +1458,7 @@ function renderBudget(){
     '<div class="empty">まだ記録がありません</div>';
   $('ktotal').textContent=fmt(tr.budget.reduce((a,b)=>a+Number(b.amt||0),0));
   $('klist').querySelectorAll('.xdel').forEach(b=>b.onclick=()=>{
-    tr.budget.splice(+b.dataset.i,1);persist();renderBudget();});
+    snap('記録の削除');tr.budget.splice(+b.dataset.i,1);persist(false);renderBudget();toastU('🗑 削除しました');});
 }
 $('kadd').onclick=()=>{
   const tr=T();if(!tr){toast('先におでかけを作成してね');return;}
@@ -1398,7 +1471,7 @@ $('kadd').onclick=()=>{
 $('expBtn').onclick=()=>{
   const blob=new Blob([JSON.stringify(db,null,1)],{type:'application/json'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);
-  a.download='odekake-data.json';document.body.appendChild(a);a.click();a.remove();
+  a.download='odekake-data-'+fdate(new Date())+'.json';document.body.appendChild(a);a.click();a.remove();
   toast('📤 ファイルを書き出しました');
 };
 $('impInput').onchange=e=>{
@@ -1409,9 +1482,13 @@ $('impInput').onchange=e=>{
       const nd=JSON.parse(ev.target.result);
       if(!nd||!Array.isArray(nd.trips))throw 0;
       if(!confirm('この端末のデータを、取り込んだ内容で置き換えます。よろしいですか？'))return;
+      snap('データの取り込み');
       db=nd;if(!db.seq)db.seq=db.trips.length+1;
+      if(!Array.isArray(db.children))db.children=[];
+      if(typeof db.storyUrl!=='string')db.storyUrl='';
+      db.trips.forEach(t=>{if(!Array.isArray(t.logs))t.logs=[];if(typeof t.pref!=='string')t.pref='';if(!t.letters||typeof t.letters!=='object')t.letters={};});
       if(!db.trips.some(t=>t.id===db.active))db.active=db.trips.length?db.trips[0].id:null;
-      persist();renderAll();toast('📥 取り込みました');
+      persist(false);renderAll();toastU('📥 取り込みました');
     }catch(err){toast('⚠️ 読めないファイルでした');}
   };
   rd.readAsText(f);e.target.value='';

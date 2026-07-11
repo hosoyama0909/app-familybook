@@ -5,7 +5,7 @@
 
 - 実装：`03_implementation/index.html`（単一ファイルのPWA・サーバ不要・ログイン不要）
 - ロードマップ：`private` リポジトリの `PLAN.md` / `roadmap.html`
-- 公開URL（GitHub Pages）：https://hosoyama0909.github.io/main/ （下記「配信」参照）
+- 公開URL（GitHub Pages）：https://hosoyama0909.github.io/app-familybook/ （下記「配信」参照）
 
 ## 開発プロセス（A-SPICE テーラリング版）
 
@@ -61,9 +61,9 @@
 - **設定**：Settings → Pages → Build and deployment → Source =「Deploy from a branch」
   → Branch: `main` / Folder: `/ (root)` → Save
 - **入口**：リポジトリ直下の `index.html` が本体 `03_implementation/index.html` へ転送する。
-  そのため **https://hosoyama0909.github.io/main/** でこのアプリが開く。
+  そのため **https://hosoyama0909.github.io/app-familybook/** でこのアプリが開く。
   転送時に `?v=時刻` を自動付与するため、更新後に古い画面がキャッシュで残らない（本体HTMLは常に最新を取得）。
-- **本体URL（直接）**：`https://hosoyama0909.github.io/main/03_implementation/index.html`
+- **本体URL（直接）**：`https://hosoyama0909.github.io/app-familybook/03_implementation/index.html`
 - 他のアプリを足すときは `別フォルダ/` に置けば `…/main/別フォルダ/` で配信される。
 
 > 更新は `main` への push/マージだけで自動反映（ブランチ配信の標準動作）。数十秒〜数分で反映。
