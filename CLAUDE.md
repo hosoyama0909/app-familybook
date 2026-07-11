@@ -66,7 +66,7 @@ node 04_test/qualification/log-feature.mjs         # 例
 - **ブランチ配信（Deploy from a branch / root）**。`main` にマージすれば自動反映。
 - 直下 `index.html` が本体 `03_implementation/index.html` へ `?v=時刻` 付きで転送
   → 更新後に古い画面がキャッシュで残らない。
-- 公開URL：**https://hosoyama0909.github.io/main/**
+- 公開URL：**https://hosoyama0909.github.io/app-familybook/**
 - GitHub Actions 配信は**使わない**（特定フォルダをルート化して複数アプリ構想と競合するため）。
 
 ---
