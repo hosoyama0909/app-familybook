@@ -1,7 +1,7 @@
 # CLAUDE.md — 家族おでかけアプリ 開発ガイド
 
 新しいセッションはこのファイルを最初に読む。ここに**このリポジトリの開発の流儀**をまとめる。
-オーナーの背景・事業プラン・引き継ぎは、非公開リポジトリ `hosoyama0909/private` の
+オーナーの背景・事業プラン・引き継ぎは、非公開リポジトリ `hosoyama0909/docs-private` の
 `CLAUDE.md` / `HANDOFF.md` / `STOP5-ROADMAP.md` を参照（Public なこのリポには個人情報を書かない）。
 
 ---
@@ -79,7 +79,7 @@ node 04_test/qualification/log-feature.mjs         # 例
 
 ---
 
-## オーナーの前提（詳細は private/CLAUDE.md）
+## オーナーの前提（詳細は docs-private/CLAUDE.md）
 
 - プロのソフトウェアエンジニア。**説明は簡潔でよい**が、**設計判断の理由**は一言添える。
 - **デザインはシンプル志向**。小さな子どもも使うので**大きめのタップ領域・分かりやすい導線**。
@@ -90,5 +90,5 @@ node 04_test/qualification/log-feature.mjs         # 例
 ## 現在地（2026-07 時点）
 
 - Stop 0–4 実装済み（しおり／きろく／ふりかえり／都道府県／AI物語・手紙・大賞・冊子PDF／親HP・まなび・提案）。
-- 次の大テーマは **Stop 5（事業化）**：順序 **B→A→C→D**（private の `STOP5-ROADMAP.md`）。
+- 次の大テーマは **Stop 5（事業化）**：順序 **B→A→C→D**（docs-private の `30_Projects/アプリ開発/STOP5-ROADMAP.md`）。
   まず B（クローズドテスト）＝今の形で家族に使ってもらい検証。
