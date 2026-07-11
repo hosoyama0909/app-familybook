@@ -25,6 +25,17 @@
 | QTC-REG-01 | スケジュールタブ表示 | 既存seed予定が従来通り描画 | SWR-CORE-01 | ✅ Pass |
 | QTC-NFR-01 | ライト/ダーク両テーマ表示 | 破綻なく可読 | SYR-N4 | ✅ Pass(目視) |
 
+### UI改善バッチ — `04_test/qualification/ui-batch.mjs`
+
+| ID | シナリオ | 期待結果 | 割当(SWR/SYR) | 結果 |
+|----|----------|----------|---------------|------|
+| QTC-DATE-01 | きろくの日付を別日に変更 | tsと日付グループが移動 | SWR-LOG-09 | ✅ Pass |
+| QTC-UNDO-01 | きろく削除→「元に戻す」 | 記録が復元される | SWR-UNDO-01 | ✅ Pass |
+| QTC-EVEDIT-01 | 予定行タップ→更新 | フォーム読込→更新→フォーム復帰 | SWR-SCHED-01 | ✅ Pass |
+| QTC-UNDO-02 | 予定更新のUndo | 変更前に戻る | SWR-UNDO-01 | ✅ Pass |
+| QTC-EVEDIT-02 | 編集キャンセル | 編集モード解除 | SWR-SCHED-01 | ✅ Pass |
+| QTC-PACKCNT-01 | 持ち物チェック | 「1 / n そろった」表示 | SWR-UI-02 | ✅ Pass |
+
 ### Stop 2（ふりかえり / 都道府県ヒストリー）— `04_test/qualification/stop2-recap-atlas.mjs`
 
 | ID | シナリオ | 期待結果 | 割当(SWR/SYR) | 結果 |
